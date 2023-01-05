@@ -1,0 +1,74 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name":"projection_test(gdp)启动",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/projection_test",
+            "args": [
+                "./data/test.png",
+                "./data/test.json",
+                "./data/test.json"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name":"get_pixel(gdp)启动",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/get_pixel",
+            "args": [
+                "./data/test.png",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name":"PnP(gdp)启动",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/PnP",
+            "args": [
+                "./data/test.json",
+                "./data/test.json",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
