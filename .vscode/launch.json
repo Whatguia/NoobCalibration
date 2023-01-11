@@ -54,8 +54,9 @@
             "request": "launch",
             "program": "${workspaceRoot}/bin/PnP",
             "args": [
+                "./data/points.json",
                 "./data/test.json",
-                "./data/test.json",
+                "./data/test2.json",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
