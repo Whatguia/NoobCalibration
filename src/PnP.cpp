@@ -4,30 +4,90 @@
 #include"extrinsic.hpp"
 #include"projection.hpp"
 
+void loadPoints(const std::string &filename,std::vector<cv::Point2f> &pixel_points,std::vector<cv::Point3f> &target_points)
+{
+    Json::Reader reader;
+	Json::Value root;
+    pixel_points.clear();
+    target_points.clear();
+
+	std::ifstream is(filename,std::ios::binary);
+	if(!is.is_open())
+	{
+		std::cout<<"Error opening file:"<<filename<<std::endl;
+		return;
+	}
+
+	if(reader.parse(is,root))
+	{
+		if(root["pixel_points"].isNull()||root["pixel_points"].type()!=Json::arrayValue||root["target_points"].isNull()||root["target_points"].type()!=Json::arrayValue)
+		{
+            std::cout<<"Error points type:"<<filename<<std::endl;
+			is.close();
+			return;
+        }
+        if(root["pixel_points"].size()!=root["target_points"].size())
+        {
+            std::cout<<"Error size of pixel_points and target_points:"<<filename<<std::endl;
+            is.close();
+            return;
+        }
+        
+        for(unsigned int i=0;i<root["pixel_points"].size();i++)
+        {
+            if(root["pixel_points"][i].isNull()||root["pixel_points"][i].type()!=Json::arrayValue||root["target_points"][i].isNull()||root["target_points"][i].type()!=Json::arrayValue)
+            {
+                std::cout<<"Error point type:"<<filename<<":"<<i<<std::endl;
+                is.close();
+                return;
+            }
+            if(root["pixel_points"][i].size()!=2||root["target_points"][i].size()!=3)
+            {
+                std::cout<<"Error point size:"<<filename<<":"<<i<<std::endl;
+                is.close();
+                return;
+            }
+
+            pixel_points.push_back(cv::Point2f(root["pixel_points"][i][0].asFloat(),root["pixel_points"][i][1].asFloat()));
+            target_points.push_back(cv::Point3f(root["target_points"][i][0].asFloat(),root["target_points"][i][1].asFloat(),root["target_points"][i][2].asFloat()));
+        }
+    }
+
+	is.close();
+	return;
+}
+
 int main(int argc,char** argv)
 {
-    if(argc!=2&&argc!=3)
+    if(argc!=3&&argc!=4)
 	{
-		std::cout<<"Usage: ./PnP <intrinsic_json_path> Optional:<extrinsic_json_path>\n"
+		std::cout<<"Usage: ./PnP <points_json_path> <intrinsic_json_path> Optional:<extrinsic_json_path>\n"
 				"example:\n"
-				"\t./bin/PnP ./data/test.json\n"
+				"\t./bin/PnP ./data/points.json ./data/test.json\n"
                 "or:\n"
-                "\t./bin/PnP ./data/test.json ./data/test.json"
+                "\t./bin/PnP ./data/points.json ./data/test.json ./data/test.json"
                 <<std::endl;
 		return 0;
 	}
-	std::string intrinsic_json_path=argv[1];
-    cv::Mat intrinsic,distortion,extrinsic=cv::Mat::eye(4,4,CV_32FC1);
+    std::string point_json_path=argv[1];
+	std::string intrinsic_json_path=argv[2];
+    std::string extrinsic_json_path;
+
+    std::vector<cv::Point2f> pixel_points;  //像素坐标系下的点
+    std::vector<cv::Point3f> target_points; //目标坐标系下的点
+
+    cv::Mat intrinsic,distortion,extrinsic=cv::Mat::eye(4,4,CV_32FC1);  //相机内参、畸变系数、相机到目标的外参
     
     cv::Mat rvec=cv::Mat::zeros(3,1,CV_64FC1); //创建旋转矩阵
     cv::Mat tvec=cv::Mat::zeros(3,1,CV_64FC1); //创建平移矩阵
     cv::Mat rotate_Matrix=cv::Mat::eye(3,3,CV_64FC1);
 
-    LoadIntrinsic(intrinsic_json_path,intrinsic,distortion);   //载入内参
-    if(argc==3)
+    loadPoints(point_json_path,pixel_points,target_points); //载入像素坐标系以及目标坐标系中点的信息
+    loadIntrinsic(intrinsic_json_path,intrinsic,distortion);   //载入内参
+    if(argc==4)
     {
-        std::string extrinsic_json_path=argv[2];
-        LoadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参
+        extrinsic_json_path=argv[3];
+        loadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参
         extrinsic=extrinsic.inv();
 
         extrinsic(cv::Rect(0,0,3,3)).copyTo(rotate_Matrix);
@@ -37,42 +97,6 @@ int main(int argc,char** argv)
         tvec.at<double>(1,0)=(double)extrinsic.at<float>(1,3);
         tvec.at<double>(2,0)=(double)extrinsic.at<float>(2,3);
     }
-std::cout<<extrinsic<<std::endl;
-std::cout<<rvec<<std::endl;
-std::cout<<tvec<<std::endl;
-std::cout<<rotate_Matrix<<std::endl;
-
-    //将控制点在世界坐标系的坐标压入容器
-    std::vector<cv::Point3f> objP;
-    objP.clear();  
-    objP.push_back(cv::Point3f(55.411636,0.207077,0.922405));
-    objP.push_back(cv::Point3f(54.457287,11.195105,4.145446));
-    objP.push_back(cv::Point3f(54.768158,16.919571,1.955162));
-    objP.push_back(cv::Point3f(56.251995,-7.482208,1.894812));
-    objP.push_back(cv::Point3f(57.712543,-12.825306,1.983112));
-    
-    objP.push_back(cv::Point3f(10.536441,2.817712,-0.716556));
-    objP.push_back(cv::Point3f(11.045214,-3.227581,-0.537572));
-    objP.push_back(cv::Point3f(32.472347,-0.500810,0.928433));
-    objP.push_back(cv::Point3f(13.188197,-0.191766,0.085958));
-    objP.push_back(cv::Point3f(105.905647,-6.861143,7.829010));
-
-    //将之前已经检测到的角点的坐标压入容器
-    std::vector<cv::Point2f> points;
-    points.clear();
-    points.push_back(cv::Point2f(656,338));
-    points.push_back(cv::Point2f(401,260));
-    points.push_back(cv::Point2f(272,315));
-    points.push_back(cv::Point2f(834,313));
-    points.push_back(cv::Point2f(945,315));
-    
-    points.push_back(cv::Point2f(318,440));
-    points.push_back(cv::Point2f(1032,420));
-    points.push_back(cv::Point2f(681,323));
-    points.push_back(cv::Point2f(680,347));
-    points.push_back(cv::Point2f(745,268));
-
-    
 
     //求解pnp
     /*
@@ -92,7 +116,7 @@ std::cout<<rotate_Matrix<<std::endl;
     )
     */
     //切记，虽然Opencv的参数偏爱float类型，但是solvepnp中除了相机内参和畸变参数矩阵是用float类型外，其余的矩阵都是double类型，不然出出现计算结果不正确的情况。
-    cv::solvePnPRansac(objP,points,intrinsic,distortion,rvec,tvec,argc==3,100,5.0,0.9899999999999999911,cv::noArray(),1);
+    cv::solvePnPRansac(target_points,pixel_points,intrinsic,distortion,rvec,tvec,argc==4,100,5.0,0.9899999999999999911,cv::noArray(),1);
     
     cv::Rodrigues(rvec,rotate_Matrix);  //将旋转向量变换成旋转矩阵
 
@@ -110,8 +134,7 @@ std::cout<<rotate_Matrix<<std::endl;
     extrinsic.at<float>(1,3)=(float)tvec.at<double>(1,0);
     extrinsic.at<float>(2,3)=(float)tvec.at<double>(2,0);
 
-    
-    cv::Mat projection_matrix=get_projection_matrix(intrinsic,extrinsic,false);
+    cv::Mat projection_matrix=getProjectionMatrix(intrinsic,extrinsic,false);
 
     std::cout<<"\n内参:"<<std::endl;
     std::cout<<intrinsic<<std::endl;
@@ -124,15 +147,19 @@ std::cout<<rotate_Matrix<<std::endl;
     std::cout<<"\n投影矩阵:"<<std::endl;
     std::cout<<projection_matrix<<std::endl;
 
-    int x,y,z;
-    cv::Mat world_point=cv::Mat::zeros(4,1,CV_64F);
-    std::cout<<"输入世界坐标:"<<std::endl;
-    while (std::cin>>x>>y>>z)
+    if(argc==4)
     {
-        std::cout<<x<<" "<<y<<" "<<z<<" "<<std::endl;
-        cv::Point2f pix=project_point(cv::Point3f(x,y,z),projection_matrix);
-        
-        std::cout<<"像素坐标:"<< pix <<std::endl<<pix.x<<" "<<pix.y<<std::endl;
+        saveExtrinsic(extrinsic_json_path,extrinsic.inv());
     }
+    // int x,y,z;
+    // cv::Mat world_point=cv::Mat::zeros(4,1,CV_64F);
+    // std::cout<<"输入世界坐标:"<<std::endl;
+    // while (std::cin>>x>>y>>z)
+    // {
+    //     std::cout<<x<<" "<<y<<" "<<z<<" "<<std::endl;
+    //     cv::Point2f pix=project_point(cv::Point3f(x,y,z),projection_matrix);
+        
+    //     std::cout<<"像素坐标:"<< pix <<std::endl<<pix.x<<" "<<pix.y<<std::endl;
+    // }
     return 0;
 }
