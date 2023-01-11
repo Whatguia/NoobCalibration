@@ -27,21 +27,17 @@ cv::Mat eular_to_matrix(float roll,float pitch,float yaw)
     return R;
 }
 
-cv::Mat get_projection_matrix(cv::Mat intrinsic,cv::Mat extrinsic,bool inverse_extrinsic=true)
+cv::Mat getProjectionMatrix(cv::Mat intrinsic,cv::Mat extrinsic,bool inverse_extrinsic=true)
 {
     cv::Mat intrinsic_extend=cv::Mat::zeros(3,4,CV_32FC1);  //扩展内参矩阵到3*4
     intrinsic.copyTo(intrinsic_extend(cv::Rect(0,0,intrinsic.rows,intrinsic.cols)));    //将内参矩阵拷贝到扩展内参矩阵
-    if(inverse_extrinsic)
-    {
-        extrinsic=extrinsic.inv();  //外参逆矩阵
-    }
-    cv::Mat projection_matrix=intrinsic_extend*extrinsic;   //投影矩阵
+    cv::Mat projection_matrix=intrinsic_extend*(inverse_extrinsic?extrinsic.inv():extrinsic);   //投影矩阵
     return projection_matrix;
 
 }
 
 //使用投影矩阵，将3D空间坐标系中的点转换到2D图像坐标系
-cv::Point2f project_point(cv::Point3f origin_xyz,cv::Mat projection_matrix)
+cv::Point2f ProjectPoint(cv::Point3f origin_xyz,cv::Mat projection_matrix)
 {
     cv::Mat origin_point=cv::Mat::zeros(4,1,CV_32FC1);
     origin_point.at<float>(0,0)=origin_xyz.x;
@@ -57,7 +53,7 @@ cv::Point2f project_point(cv::Point3f origin_xyz,cv::Mat projection_matrix)
     return cv::Point2f(result_x,result_y);
 }
 
-cv::Mat get_box(cv::Mat xyz_wlh_yaw)
+cv::Mat getBox(cv::Mat xyz_wlh_yaw)
 {
     float* point_data=xyz_wlh_yaw.ptr<float>(0);
 
@@ -92,14 +88,14 @@ cv::Mat get_box(cv::Mat xyz_wlh_yaw)
     return corners;
 }
 
-void draw_box_corners(cv::Mat data,cv::Mat corners,cv::Mat projection_matrix,cv::Scalar colors)
+void drawBoxCorners(cv::Mat data,cv::Mat corners,cv::Mat projection_matrix,cv::Scalar colors)
 {
     //将目标框的顶点转换到图像坐标系
     std::vector<cv::Point2f> corners_xy;
     for(int col=0;col<corners.cols;col++)
     {
         corners_xy.push_back(
-            project_point(
+            ProjectPoint(
                 cv::Point3f(
                     corners.at<float>(0,col),
                     corners.at<float>(1,col),
@@ -132,7 +128,7 @@ void draw_box_corners(cv::Mat data,cv::Mat corners,cv::Mat projection_matrix,cv:
     }
 }
 
-void draw_box_bev(cv::Mat data,cv::Mat corners,cv::Scalar colors)
+void drawBoxBev(cv::Mat data,cv::Mat corners,cv::Scalar colors)
 {
     //在bev图像中绘制目标框的边
     float* x_corners_bev=corners.ptr<float>(1);
