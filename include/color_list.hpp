@@ -3,8 +3,9 @@
 #include<iostream>
 #include<opencv2/opencv.hpp>
 
-void Init_color_list(std::vector<cv::Scalar> &color_list)
+void initColorList(std::vector<cv::Scalar> &color_list)
 {
+    color_list.clear();
     color_list.push_back(cv::Scalar(0,255,0));
     color_list.push_back(cv::Scalar(255,255,0));
     color_list.push_back(cv::Scalar(34,34,178));
