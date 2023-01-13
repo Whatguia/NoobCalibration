@@ -10,9 +10,9 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 
-add_executable(projection_test ./src/projection_test.cpp)
-target_link_libraries(projection_test ${OpenCV_LIBS})
-target_link_libraries(projection_test libjsoncpp.a)
+add_executable(test ./src/test.cpp)
+target_link_libraries(test ${OpenCV_LIBS})
+target_link_libraries(test libjsoncpp.a)
 
 add_executable(get_pixel ./src/get_pixel.cpp)
 target_link_libraries(get_pixel ${OpenCV_LIBS})
@@ -20,3 +20,7 @@ target_link_libraries(get_pixel ${OpenCV_LIBS})
 add_executable(PnP ./src/PnP.cpp)
 target_link_libraries(PnP ${OpenCV_LIBS})
 target_link_libraries(PnP libjsoncpp.a)
+
+add_executable(bat3D ./src/bat3D.cpp)
+target_link_libraries(bat3D ${OpenCV_LIBS})
+target_link_libraries(bat3D libjsoncpp.a)
