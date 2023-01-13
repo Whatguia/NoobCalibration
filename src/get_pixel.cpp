@@ -33,6 +33,7 @@ void on_mouse(int event,int x,int y,int flags,void *ustc)
     }
     cv::imshow(" ",resize_image);
 }
+
 int main(int argc,char** argv)
 {
     if(argc!=2)

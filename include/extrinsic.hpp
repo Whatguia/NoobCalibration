@@ -4,6 +4,7 @@
 #include<opencv2/opencv.hpp>
 #include"jsoncpp/json/json.h"
 
+//读取外参
 void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 {
 	Json::Reader reader;
@@ -110,6 +111,7 @@ void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 	return;
 }
 
+//修改并保存外参，仅修改外参部分（平移和旋转）
 void saveExtrinsic(const std::string &filename,cv::Mat extrinsic)
 {
 	Json::Reader reader;

@@ -4,6 +4,7 @@
 #include<opencv2/opencv.hpp>
 #include"jsoncpp/json/json.h"
 
+//读取内参
 void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion)
 {
 	Json::Reader reader;

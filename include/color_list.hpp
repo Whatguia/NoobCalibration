@@ -3,6 +3,7 @@
 #include<iostream>
 #include<opencv2/opencv.hpp>
 
+//初始化颜色列表
 void initColorList(std::vector<cv::Scalar> &color_list)
 {
     color_list.clear();
