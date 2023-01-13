@@ -10,9 +10,10 @@
             "request": "launch",
             "program": "${workspaceRoot}/bin/projection_test",
             "args": [
-                "./data/test.png",
-                "./data/test.json",
-                "./data/test.json"
+                "/media/hrz/data/workspace/bat-3d-master/input/InDriving/2022_11_04_changchun_hongqi_10/images/CAM_BACK/000001.jpg",
+                "./data/test2.json",
+                "./data/test2.json",
+                "./data/boxes.json"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
