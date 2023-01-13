@@ -3,59 +3,7 @@
 #include"intrinsic.hpp"
 #include"extrinsic.hpp"
 #include"projection.hpp"
-
-void loadPoints(const std::string &filename,std::vector<cv::Point2f> &pixel_points,std::vector<cv::Point3f> &target_points)
-{
-    Json::Reader reader;
-	Json::Value root;
-    pixel_points.clear();
-    target_points.clear();
-
-	std::ifstream is(filename,std::ios::binary);
-	if(!is.is_open())
-	{
-		std::cout<<"Error opening file:"<<filename<<std::endl;
-		return;
-	}
-
-	if(reader.parse(is,root))
-	{
-		if(root["pixel_points"].isNull()||root["pixel_points"].type()!=Json::arrayValue||root["target_points"].isNull()||root["target_points"].type()!=Json::arrayValue)
-		{
-            std::cout<<"Error points type:"<<filename<<std::endl;
-			is.close();
-			return;
-        }
-        if(root["pixel_points"].size()!=root["target_points"].size())
-        {
-            std::cout<<"Error size of pixel_points and target_points:"<<filename<<std::endl;
-            is.close();
-            return;
-        }
-        
-        for(unsigned int i=0;i<root["pixel_points"].size();i++)
-        {
-            if(root["pixel_points"][i].isNull()||root["pixel_points"][i].type()!=Json::arrayValue||root["target_points"][i].isNull()||root["target_points"][i].type()!=Json::arrayValue)
-            {
-                std::cout<<"Error point type:"<<filename<<":"<<i<<std::endl;
-                is.close();
-                return;
-            }
-            if(root["pixel_points"][i].size()!=2||root["target_points"][i].size()!=3)
-            {
-                std::cout<<"Error point size:"<<filename<<":"<<i<<std::endl;
-                is.close();
-                return;
-            }
-
-            pixel_points.push_back(cv::Point2f(root["pixel_points"][i][0].asFloat(),root["pixel_points"][i][1].asFloat()));
-            target_points.push_back(cv::Point3f(root["target_points"][i][0].asFloat(),root["target_points"][i][1].asFloat(),root["target_points"][i][2].asFloat()));
-        }
-    }
-
-	is.close();
-	return;
-}
+#include"PnP.hpp"
 
 int main(int argc,char** argv)
 {
@@ -69,9 +17,9 @@ int main(int argc,char** argv)
                 <<std::endl;
 		return 0;
 	}
-    std::string point_json_path=argv[1];
-	std::string intrinsic_json_path=argv[2];
-    std::string extrinsic_json_path;
+    std::string point_json_path=argv[1];    //像素坐标系以及目标坐标系下的点对json文件路径
+	std::string intrinsic_json_path=argv[2];    //内参json文件路径
+    std::string extrinsic_json_path;    //可选参数，外参json文件路径
 
     std::vector<cv::Point2f> pixel_points;  //像素坐标系下的点
     std::vector<cv::Point3f> target_points; //目标坐标系下的点
@@ -86,19 +34,20 @@ int main(int argc,char** argv)
     loadIntrinsic(intrinsic_json_path,intrinsic,distortion);   //载入内参
     if(argc==4)
     {
-        extrinsic_json_path=argv[3];
+        //当可选参数<extrinsic_json_path>启用时，读取外参文件中的外参信息，并作为外参的初值送入PnP进行计算
+        extrinsic_json_path=argv[3];    //外参json文件路径
         loadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参
-        extrinsic=extrinsic.inv();
+        extrinsic=extrinsic.inv();  //默认从文件读取的是从相机到目标的外参，因此会使用外参矩阵的逆矩阵
 
-        extrinsic(cv::Rect(0,0,3,3)).copyTo(rotate_Matrix);
+        extrinsic(cv::Rect(0,0,3,3)).copyTo(rotate_Matrix); //取出外参矩阵中的旋转矩阵
 
         cv::Rodrigues(rotate_Matrix,rvec);  //将旋转矩阵变换成旋转向量
-        tvec.at<double>(0,0)=(double)extrinsic.at<float>(0,3);
-        tvec.at<double>(1,0)=(double)extrinsic.at<float>(1,3);
-        tvec.at<double>(2,0)=(double)extrinsic.at<float>(2,3);
+        for(int i=0;i<3;i++)
+        {
+            tvec.at<double>(i,0)=(double)extrinsic.at<float>(i,3);  //取出外参矩阵中的平移向量
+        }
     }
 
-    //求解pnp
     /*
     bool cv::solvePnPRansac(
         cv::InputArray objectPoints,    Array of object points in the object coordinate space, Nx3 1-channel or 1xN/Nx1 3-channel, where N is the number of points. vector<Point3d> can be also passed here.
@@ -114,8 +63,9 @@ int main(int argc,char** argv)
         cv::OutputArray inliers = noArray(),    Output vector that contains indices of inliers in objectPoints and imagePoints .
         int flags = 0   Method for solving a PnP problem (see solvePnP ). The function estimates an object pose given a set of object points, their corresponding image projections, as well as the camera matrix and the distortion coefficients. This function finds such a pose that minimizes reprojection error, that is, the sum of squared distances between the observed projections imagePoints and the projected (using projectPoints ) objectPoints. The use of RANSAC makes the function resistant to outliers.
     )
+    切记，虽然Opencv的参数偏爱float类型，但是solvepnp中除了相机内参和畸变参数矩阵是用float类型外，其余的矩阵都是double类型，不然出出现计算结果不正确的情况。
     */
-    //切记，虽然Opencv的参数偏爱float类型，但是solvepnp中除了相机内参和畸变参数矩阵是用float类型外，其余的矩阵都是double类型，不然出出现计算结果不正确的情况。
+    //求解pnp
     cv::solvePnPRansac(target_points,pixel_points,intrinsic,distortion,rvec,tvec,argc==4,100,5.0,0.9899999999999999911,cv::noArray(),1);
     
     cv::Rodrigues(rvec,rotate_Matrix);  //将旋转向量变换成旋转矩阵
@@ -134,7 +84,8 @@ int main(int argc,char** argv)
     extrinsic.at<float>(1,3)=(float)tvec.at<double>(1,0);
     extrinsic.at<float>(2,3)=(float)tvec.at<double>(2,0);
 
-    cv::Mat projection_matrix=getProjectionMatrix(intrinsic,extrinsic,false);
+    cv::Mat projection_matrix=getProjectionMatrix(intrinsic,extrinsic,false);   //根据内参与外参计算投影矩阵，注意外参的目标，PnP计算的外参是从相机到目标的坐标系，因此将inverse_extrinsic参数设置为false
+    std::vector<float> projection_error=getProjectionError(pixel_points,target_points,projection_matrix);   //获取重投影误差
 
     std::cout<<"\n内参:"<<std::endl;
     std::cout<<intrinsic<<std::endl;
@@ -147,8 +98,19 @@ int main(int argc,char** argv)
     std::cout<<"\n投影矩阵:"<<std::endl;
     std::cout<<projection_matrix<<std::endl;
 
+    float average_projection_error=0;
+    std::cout<<"\n投影误差:"<<std::endl;
+    for(std::vector<float>::iterator i=projection_error.begin();i!=projection_error.end();i++)
+    {
+        average_projection_error+=*i;
+        std::cout<<(int)*i<<"\t";
+    }
+    std::cout<<"\n平均投影误差:"<<std::endl;
+    std::cout<<average_projection_error/projection_error.size()<<std::endl;
+
     if(argc==4)
     {
+        //当可选参数<extrinsic_json_path>启用时，更新外参文件中的外参信息
         saveExtrinsic(extrinsic_json_path,extrinsic.inv());
     }
     // int x,y,z;
