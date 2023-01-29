@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Noob_Calibration VERSION 0.1.0)
+project(NoobCalibration VERSION 0.1.0)
 set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
@@ -24,3 +24,7 @@ target_link_libraries(PnP libjsoncpp.a)
 add_executable(bat3D ./src/bat3D.cpp)
 target_link_libraries(bat3D ${OpenCV_LIBS})
 target_link_libraries(bat3D libjsoncpp.a)
+
+add_executable(once ./test/once/once.cpp)
+target_link_libraries(once ${OpenCV_LIBS})
+target_link_libraries(once libjsoncpp.a)

@@ -71,6 +71,30 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name":"once(gdp)启动",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/once",
+            "args": [
+                "/media/hrz/data/huawei/data/000076/cam08/1616343527200.jpg",
+                "./test/once/cam_right_back.json",
+                "./test/once/cam_right_back.json",
+                "./test/once/boxes.json"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }
