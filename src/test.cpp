@@ -4,6 +4,7 @@
 #include"extrinsic.hpp"
 #include"projection.hpp"
 #include"color_list.hpp"
+#include"bat3D.hpp"
 
 int main(int argc,char** argv)
 {
