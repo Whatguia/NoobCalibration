@@ -1,4 +1,4 @@
-image_path="./data/test.png"
+image_path="./data/test.jpg"
 intrinsic_json_path="./data/test.json"
 extrinsic_json_path="./data/test.json"
 boxes_json_path="./data/boxes.json"
