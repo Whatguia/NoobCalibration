@@ -32,15 +32,13 @@ int main(int argc,char** argv)
     loadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参
     cv::Mat projection_matrix=getProjectionMatrix(intrinsic,extrinsic);   //根据内参与外参计算投影矩阵，注意外参的目标，默认从文件读取的是从相机到目标的外参，因此会使用外参矩阵的逆矩阵
 
-    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,cv::Size(1920,1020),0.0,cv::Size(1920,1020));  //根据内参与畸变系数计算去畸变后的内参
+    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,cv::Size(image.cols,image.rows),0.0,cv::Size(image.cols,image.rows));    //根据内参与畸变系数计算去畸变后的内参
     cv::Mat undistort_projection_matrix=getProjectionMatrix(undistort_intrinsic,extrinsic);   //去畸变后的投影矩阵
     cv::Mat undistort_image;
     cv::undistort(image,undistort_image,intrinsic,distortion,undistort_intrinsic);  //图像去畸变
     
-    // std::cout<<undistort_projection_matrix<<std::endl;
-    // cv::imwrite("./000000.jpg",undistort_image);
-    std::cout<<projection_matrix<<std::endl;
-
+    std::cout<<"projection_matrix:\n"<<projection_matrix<<std::endl;
+    std::cout<<"undistort_projection_matrix:\n"<<undistort_projection_matrix<<std::endl;
     if(argc==5)
     {
         //当可选参数<boxes_json_path>启用时，对读入的bat3D标注进行绘制
@@ -57,8 +55,7 @@ int main(int argc,char** argv)
     }
     else
     {
-        //当可选参数<boxes_json_path>未启用时，打印去畸变后的投影矩阵，并保存去畸变后的图像，然后随便整点东西看
-        std::cout<<undistort_projection_matrix<<std::endl;
+        //当可选参数<boxes_json_path>未启用时，保存去畸变后的图像，然后随便整点东西看
         cv::imwrite(image_path+".undisrorted."+image_path.substr(image_path.length()-4,image_path.length()-1),undistort_image);
         
         int i=0;
