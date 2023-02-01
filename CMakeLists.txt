@@ -20,11 +20,3 @@ target_link_libraries(get_pixel ${OpenCV_LIBS})
 add_executable(PnP ./src/PnP.cpp)
 target_link_libraries(PnP ${OpenCV_LIBS})
 target_link_libraries(PnP libjsoncpp.a)
-
-add_executable(bat3D ./src/bat3D.cpp)
-target_link_libraries(bat3D ${OpenCV_LIBS})
-target_link_libraries(bat3D libjsoncpp.a)
-
-add_executable(once ./test/once/once.cpp)
-target_link_libraries(once ${OpenCV_LIBS})
-target_link_libraries(once libjsoncpp.a)
