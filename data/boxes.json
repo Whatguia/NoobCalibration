@@ -4,27 +4,6 @@
     "index": 1,
     "labels": [
         {
-            "id": 0,
-            "category": "Car",
-            "box3d": {
-                "location": {
-                    "x": -3.460779890336198,
-                    "y": 11.889099506707907,
-                    "z": -0.8206982783150591
-                },
-                "dimension": {
-                    "width": 1.8030093908309937,
-                    "length": 4.555971205891034,
-                    "height": 1.5509192471702893
-                },
-                "orientation": {
-                    "rotationYaw": 5.2348885297696235,
-                    "rotationPitch": 0,
-                    "rotationRoll": 0
-                }
-            }
-        },
-        {
             "id": 1,
             "category": "Car",
             "box3d": {
