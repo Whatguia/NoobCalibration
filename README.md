@@ -100,7 +100,7 @@ cd {NoobCalibration_path}
 
 <img src="./docs/matlab.png" width="50%" height="50%" alt="Camera Calibration" div align=center />
 
-内参标定完成后，将标定结果手动填``标定参数文件``中的``"image_size"``，``"intrinsic"``，``"distortion"``字段中，具体填法参考上文的``参数说明``。
+内参标定完成后，将标定结果手动填入``标定参数文件``中的``"image_size"``，``"intrinsic"``，``"distortion"``字段中，具体填写方法参考上文的``参数说明``。
 ### 外参标定
 1. 首先浏览录制的外参数据中的相机图像，选择``图像清晰``的一帧数据。
 
