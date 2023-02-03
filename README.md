@@ -55,7 +55,7 @@ cd {NoobCalibration_path}
 结合计算结果以及投影结果，可以看到该方法计算的外参结果与ONCE数据集给定的外参相差较小，平移差距17cm（平移向量之间的距离），旋转差距0.29度（三个方向的旋转差距之和），并且投影结果也相差较小，可以认为改标定方法在ONCE数据集的表现还不错。
 #
 ## 参数说明
-```json
+```
 标定参数文件，可以参考{NoobCalibration_path}/data/test.json
 {
    "channel" : 无意义,
@@ -69,7 +69,7 @@ cd {NoobCalibration_path}
    "target" : 平移和旋转相对的目标,
 }
 ```
-```json
+```
 点对文件，可以参考{NoobCalibration_path}/data/points.json
 {
     "target_points" : 点云坐标系下点的坐标，注意顺序要与像素坐标系下点的坐标对应，
