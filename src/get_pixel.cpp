@@ -49,11 +49,11 @@ int main(int argc,char** argv)
     image_extend=cv::Mat::zeros(image.rows+100,image.cols+100,CV_8UC3);
     image.copyTo(image_extend(cv::Rect(50,50,image.cols,image.rows)));
 
-    cv::namedWindow("image");
+    cv::namedWindow(image_path);
     while(true)
     {
-        cv::setMouseCallback("image",on_mouse,0);   //调用回调函数
-        cv::imshow("image",image);
+        cv::setMouseCallback(image_path,on_mouse,0);   //调用回调函数
+        cv::imshow(image_path,image);
         if(cv::waitKey()==27)
         {
             break;
