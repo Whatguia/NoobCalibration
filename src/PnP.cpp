@@ -70,19 +70,14 @@ int main(int argc,char** argv)
     
     cv::Rodrigues(rvec,rotate_Matrix);  //将旋转向量变换成旋转矩阵
 
-    extrinsic.at<float>(0,0)=(float)rotate_Matrix.at<double>(0,0);
-    extrinsic.at<float>(0,1)=(float)rotate_Matrix.at<double>(0,1);
-    extrinsic.at<float>(0,2)=(float)rotate_Matrix.at<double>(0,2);
-    extrinsic.at<float>(1,0)=(float)rotate_Matrix.at<double>(1,0);
-    extrinsic.at<float>(1,1)=(float)rotate_Matrix.at<double>(1,1);
-    extrinsic.at<float>(1,2)=(float)rotate_Matrix.at<double>(1,2);
-    extrinsic.at<float>(2,0)=(float)rotate_Matrix.at<double>(2,0);
-    extrinsic.at<float>(2,1)=(float)rotate_Matrix.at<double>(2,1);
-    extrinsic.at<float>(2,2)=(float)rotate_Matrix.at<double>(2,2);
-    extrinsic.at<float>(3,3)=1;
-    extrinsic.at<float>(0,3)=(float)tvec.at<double>(0,0);
-    extrinsic.at<float>(1,3)=(float)tvec.at<double>(1,0);
-    extrinsic.at<float>(2,3)=(float)tvec.at<double>(2,0);
+    for(int row=0;row<extrinsic.rows-1;row++)
+    {
+        for(int col=0;col<extrinsic.cols-1;col++)
+        {
+            extrinsic.at<float>(row,col)=(float)rotate_Matrix.at<double>(row,col);  //将旋转矩阵填入外参矩阵
+        }
+        extrinsic.at<float>(row,extrinsic.cols-1)=(float)tvec.at<double>(row,0);    //将平移向量填入外参矩阵
+    }
 
     cv::Mat projection_matrix=getProjectionMatrix(intrinsic,extrinsic,false);   //根据内参与外参计算投影矩阵，注意外参的目标，PnP计算的外参是从相机到目标的坐标系，因此将inverse_extrinsic参数设置为false
     std::vector<float> projection_error=getProjectionError(pixel_points,target_points,projection_matrix);   //获取重投影误差

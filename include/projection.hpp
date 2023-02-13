@@ -81,10 +81,9 @@ cv::Mat getBox(cv::Mat xyz_wlh_yaw)
     //根据目标框的位置平移顶点
     for(int row=0;row<corners.rows;row++)
     {
-        float* row_data=corners.ptr<float>(row);
         for(int col=0;col<corners.cols;col++)
         {
-            row_data[col]+=point_data[row];
+            corners.at<float>(row,col)+=point_data[row];
         }
     }
 
