@@ -95,10 +95,10 @@ int main(int argc,char** argv)
 
     float average_projection_error=0;
     std::cout<<"\n投影误差:"<<std::endl;
-    for(std::vector<float>::iterator i=projection_error.begin();i!=projection_error.end();i++)
+    for(size_t i=0;i<projection_error.size();i++)
     {
-        average_projection_error+=*i;
-        std::cout<<(int)*i<<"\t";
+        average_projection_error+=projection_error[i];
+        std::cout<<(i+1)<<":"<<projection_error[i]<<"\t";
     }
     std::cout<<"\n平均投影误差:"<<std::endl;
     std::cout<<average_projection_error/projection_error.size()<<std::endl;
