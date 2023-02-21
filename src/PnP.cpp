@@ -66,7 +66,7 @@ int main(int argc,char** argv)
     切记，虽然Opencv的参数偏爱float类型，但是solvepnp中除了相机内参和畸变参数矩阵是用float类型外，其余的矩阵都是double类型，不然出出现计算结果不正确的情况。
     */
     //求解pnp
-    cv::solvePnPRansac(target_points,pixel_points,intrinsic,distortion,rvec,tvec,argc==4,100,5.0,0.9899999999999999911,cv::noArray(),1);
+    cv::solvePnPRansac(target_points,pixel_points,intrinsic,distortion,rvec,tvec,argc==4,100,8.0,0.9899999999999999911,cv::noArray(),1);
     
     cv::Rodrigues(rvec,rotate_Matrix);  //将旋转向量变换成旋转矩阵
 
@@ -98,7 +98,11 @@ int main(int argc,char** argv)
     for(size_t i=0;i<projection_error.size();i++)
     {
         average_projection_error+=projection_error[i];
-        std::cout<<(i+1)<<":"<<projection_error[i]<<"\t";
+        std::cout<<(i+1)<<": "<<projection_error[i]<<"\t";
+        if(!((i+1)%5))
+        {
+            std::cout<<std::endl;
+        }
     }
     std::cout<<"\n平均投影误差:"<<std::endl;
     std::cout<<average_projection_error/projection_error.size()<<std::endl;
