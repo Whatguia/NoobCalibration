@@ -77,7 +77,7 @@ cd {NoobCalibration_path}
    "modality" : 传感器自身类型,
    "image_size" : 图像大小 [w,h]，其中w代表图像的宽，h代表图像的高,
    "intrinsic" : 内参矩阵 [fx,skew,u0,0,fy,v0,0,0,1]，其中fx、fy代表焦距，u0、v0代表图像的中心像素坐标和图像原点像素坐标之间相差的横向和纵向像素数，skew代表扭曲参数,
-   "distortion" : 畸变参数 [k1,k2,k3,p1,p2] 或 [k1,k2,p1,p2]，其中k代表径向畸变，p代表切向畸变,
+   "distortion" : 畸变参数 [k1,k2,p1,p2[,k3]]，其中k代表径向畸变，p代表切向畸变,
    "undistort_intrinsic" : 去畸变后的内参矩阵，可由 内参矩阵 与 畸变参数 生成 [fx,skew,u0,0,fy,v0,0,0,1],
    "rotation" : 旋转矩阵，表示该传感器在目标的坐标系下的旋转，可以使用cv::Rodrigues(rotation,xyz)（c++）或scipy.spatial.transform.Rotation.from_matrix(rotation).as_euler("xyz")（python）将旋转矩阵变换成旋转向量,
    "translation" : 平移向量，表示该传感器在目标的坐标系下的平移 [x,y,z],
