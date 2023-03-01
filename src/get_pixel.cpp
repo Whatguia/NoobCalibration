@@ -40,7 +40,7 @@ int main(int argc,char** argv)
 	{
 	    std::cout<<"Usage: ./Get_Pixel <image_path>\n"
 				"example:\n"
-				"\t./bin/Get_Pixel ./data/test.png"
+				"\t./bin/Get_Pixel ./data/test.jpg"
                 <<std::endl;
 		return 0;
 	}

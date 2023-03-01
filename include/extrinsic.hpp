@@ -4,7 +4,7 @@
 #include<opencv2/opencv.hpp>
 #include"jsoncpp/json/json.h"
 
-//读取外参
+//读取外参矩阵
 void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 {
 	Json::Reader reader;
