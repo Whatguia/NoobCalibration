@@ -10,11 +10,11 @@ int main(int argc,char** argv)
 {
     if(argc!=4&&argc!=5)
 	{
-		std::cout<<"Usage: ./projection_test <image_path> <intrinsic_json_path> <extrinsic_json_path> Optional:<boxes_json_path>\n"
+		std::cout<<"Usage: ./test <image_path> <intrinsic_json_path> <extrinsic_json_path> Optional:<boxes_json_path>\n"
 				"example:\n"
-				"\t./bin/projection_test ./data/test.png ./data/test.json ./data/test.json\n"
+				"\t./bin/test ./data/test.jpg ./data/test.json ./data/test.json\n"
                 "or:\n"
-				"\t./bin/projection_test ./data/test.png ./data/test.json ./data/test.json ./data/boxes.json"
+				"\t./bin/test ./data/test.jpg ./data/test.json ./data/test.json ./data/boxes.json"
                 <<std::endl;
 		return 0;
 	}
@@ -23,31 +23,36 @@ int main(int argc,char** argv)
 	std::string extrinsic_json_path=argv[3];    //外参json文件路径
     std::string boxes_json_path;    //可选参数，bat3D标注json文件路径
 
-    cv::Mat intrinsic,distortion,extrinsic,image=cv::imread(image_path);
-    std::vector<cv::Mat> boxes;
+    cv::Mat image=cv::imread(image_path);
 
-    std::vector<cv::Scalar> color_list;
-    initColorList(color_list);  //初始化颜色列表，只是画框时好看一点，没啥用
-    loadIntrinsic(intrinsic_json_path,intrinsic,distortion);   //载入内参
-    loadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参
-    cv::Mat projection_matrix=getProjectionMatrix(intrinsic,extrinsic);   //根据内参与外参计算投影矩阵，注意外参的目标，默认从文件读取的是从相机到目标的外参，因此会使用外参矩阵的逆矩阵
-
-    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,cv::Size(image.cols,image.rows),0.0,cv::Size(image.cols,image.rows));    //根据内参与畸变系数计算去畸变后的内参
-    cv::Mat undistort_projection_matrix=getProjectionMatrix(undistort_intrinsic,extrinsic);   //去畸变后的投影矩阵
+    cv::Mat intrinsic,distortion;   //相机内参、畸变系数
+    cv::Point2i image_size; //相机内参对应的图像大小
+    loadIntrinsic(intrinsic_json_path,intrinsic,distortion,image_size);   //载入内参
+    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,cv::Size(image_size.x,image_size.y),0.0,cv::Size(image_size.x,image_size.y));    //根据内参与畸变系数计算去畸变后的内参
     cv::Mat undistort_image;
     cv::undistort(image,undistort_image,intrinsic,distortion,undistort_intrinsic);  //图像去畸变
+
+    cv::Mat extrinsic;
+    loadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参
+
+    cv::Mat projection_matrix=getProjectionMatrix(intrinsic,extrinsic);   //根据内参与外参计算投影矩阵，注意外参的目标，默认从文件读取的是从相机到目标的外参，因此会使用外参矩阵的逆矩阵
+    cv::Mat undistort_projection_matrix=getProjectionMatrix(undistort_intrinsic,extrinsic);   //去畸变后的投影矩阵
     
     std::cout<<"projection_matrix:\n"<<projection_matrix<<std::endl;
     std::cout<<"undistort_projection_matrix:\n"<<undistort_projection_matrix<<std::endl;
+
+    std::vector<cv::Scalar> color_list;
+    initColorList(color_list);  //初始化颜色列表，只是画框时好看一点，没啥用
+    std::vector<cv::Mat> boxes;
     if(argc==5)
     {
         //当可选参数<boxes_json_path>启用时，对读入的bat3D标注进行绘制
         boxes_json_path=argv[4];    //bat3D标注json文件路径
-        loadBat3D(boxes_json_path,boxes);    //载入bat3D标注
+        loadBat3D(boxes_json_path,boxes);   //载入bat3D标注
 
         for(size_t i=0;i<boxes.size();i++)
         {
-            drawBoxCorners(undistort_image,getBox(boxes[i]),undistort_projection_matrix,color_list[i%10]);   //根据标注信息获取标注框，然后与投影矩阵进行运算获取像素坐标系下的框，并进行绘制
+            drawBoxCorners(undistort_image,getBox(boxes[i]),undistort_projection_matrix,color_list[i%10]);  //根据标注信息获取标注框，然后与投影矩阵进行运算获取像素坐标系下的框，并进行绘制
         }
 
         cv::imshow("test",undistort_image);
