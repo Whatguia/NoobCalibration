@@ -4,8 +4,8 @@
 #include<opencv2/opencv.hpp>
 #include"jsoncpp/json/json.h"
 
-//读取内参
-void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion)
+//读取内参矩阵、畸变参数、图像大小
+void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion,cv::Point2i &image_size)
 {
 	Json::Reader reader;
 	Json::Value root;
@@ -81,10 +81,66 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 			double data=root["distortion"][i].asFloat();
 			distortion_vector.push_back(data);
 		}
+
+		//read image_size[2]
+		if(root["image_size"].isNull()||root["image_size"].type()!=Json::arrayValue)
+		{
+			std::cout<<"Error image_size type:"<<filename<<std::endl;
+			is.close();
+			return;
+		}
+		if(root["image_size"].size()!=2)
+		{
+			std::cout<<"Error image_size size:"<<filename<<std::endl;
+			is.close();
+			return;
+		}
+		
+		image_size.x=root["image_size"][0].asInt();
+		image_size.y=root["image_size"][1].asInt();
 	}
 
 	intrinsic=cv::Mat(intrinsic_vector).clone().reshape(1,3);
 	distortion=cv::Mat(distortion_vector).clone().reshape(1,1);
 	is.close();
+	return;
+}
+
+//保存去畸变后的内参
+void saveIntrinsic(const std::string &filename,cv::Mat undistort_intrinsic)
+{
+	Json::Reader reader;
+	Json::Value root;
+
+	std::ifstream is(filename,std::ios::binary);
+	if(!is.is_open())
+	{
+		std::cout<<"Error opening file:"<<filename<<std::endl;
+		return;
+	}
+
+	if(reader.parse(is,root))
+	{
+		Json::Value undistort_intrinsic_obj;
+		for(int i=0;i<9;i++)
+		{
+			undistort_intrinsic_obj.append(undistort_intrinsic.at<float>(i/3,i%3));
+		}
+
+		root["undistort_intrinsic"]=undistort_intrinsic_obj;
+	}
+	is.close();
+
+	std::ofstream os;
+	os.open(filename,std::ios::out);
+	if (!os.is_open())
+	{
+		std::cout<<"Error opening file:"<<filename<<std::endl;
+		return;
+	}
+	Json::StyledWriter sw;
+	os<<sw.write(root);
+	os.close();
+
 	return;
 }
