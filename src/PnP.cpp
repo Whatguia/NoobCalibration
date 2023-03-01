@@ -23,20 +23,22 @@ int main(int argc,char** argv)
 
     std::vector<cv::Point2f> pixel_points;  //像素坐标系下的点
     std::vector<cv::Point3f> target_points; //目标坐标系下的点
-
-    cv::Mat intrinsic,distortion,extrinsic=cv::Mat::eye(4,4,CV_32FC1);  //相机内参、畸变系数、相机到目标的外参
-    
-    cv::Mat rvec=cv::Mat::zeros(3,1,CV_64FC1); //创建旋转矩阵
-    cv::Mat tvec=cv::Mat::zeros(3,1,CV_64FC1); //创建平移矩阵
-    cv::Mat rotate_Matrix=cv::Mat::eye(3,3,CV_64FC1);
-
     loadPoints(point_json_path,pixel_points,target_points); //载入像素坐标系以及目标坐标系中点的信息
-    loadIntrinsic(intrinsic_json_path,intrinsic,distortion);   //载入内参
+
+    cv::Mat intrinsic,distortion;   //相机内参、畸变系数
+    cv::Point2i image_size; //相机内参对应的图像大小
+    loadIntrinsic(intrinsic_json_path,intrinsic,distortion,image_size);   //载入内参矩阵、畸变参数、图像大小
+    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,cv::Size(image_size.x,image_size.y),0.0,cv::Size(image_size.x,image_size.y));    //根据内参与畸变系数计算去畸变后的内参
+
+    cv::Mat extrinsic=cv::Mat::eye(4,4,CV_32FC1);   //相机到目标的外参
+    cv::Mat rvec=cv::Mat::zeros(3,1,CV_64FC1);  //创建旋转矩阵
+    cv::Mat tvec=cv::Mat::zeros(3,1,CV_64FC1);  //创建平移矩阵
+    cv::Mat rotate_Matrix=cv::Mat::eye(3,3,CV_64FC1);
     if(argc==4)
     {
         //当可选参数<extrinsic_json_path>启用时，读取外参文件中的外参信息，并作为外参的初值送入PnP进行计算
         extrinsic_json_path=argv[3];    //外参json文件路径
-        loadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参
+        loadExtrinsic(extrinsic_json_path,extrinsic);   //载入外参矩阵
         extrinsic=extrinsic.inv();  //默认从文件读取的是从相机到目标的外参，因此会使用外参矩阵的逆矩阵
 
         extrinsic(cv::Rect(0,0,3,3)).copyTo(rotate_Matrix); //取出外参矩阵中的旋转矩阵
@@ -86,6 +88,8 @@ int main(int argc,char** argv)
     std::cout<<intrinsic<<std::endl;
     std::cout<<"\n畸变:"<<std::endl;
     std::cout<<distortion<<std::endl;
+    std::cout<<"\n去畸变后的内参:"<<std::endl;
+    std::cout<<undistort_intrinsic<<std::endl;
     std::cout<<"\n外参(目标到相机):"<<std::endl;
     std::cout<<extrinsic<<std::endl;
     std::cout<<"\n外参(相机到目标):"<<std::endl;
@@ -109,11 +113,12 @@ int main(int argc,char** argv)
 
     if(argc==4)
     {
-        //当可选参数<extrinsic_json_path>启用时，更新外参文件中的外参信息
+        //当可选参数<extrinsic_json_path>启用时，更新外参文件中的信息
         saveExtrinsic(extrinsic_json_path,extrinsic.inv());
+        saveIntrinsic(extrinsic_json_path,undistort_intrinsic);
     }
+
     // int x,y,z;
-    // cv::Mat world_point=cv::Mat::zeros(4,1,CV_64F);
     // std::cout<<"输入世界坐标:"<<std::endl;
     // while (std::cin>>x>>y>>z)
     // {
