@@ -26,9 +26,9 @@ int main(int argc,char** argv)
     cv::Mat image=cv::imread(image_path);
 
     cv::Mat intrinsic,distortion;   //相机内参、畸变系数
-    cv::Point2i image_size; //相机内参对应的图像大小
+    cv::Size image_size;    //相机内参对应的图像大小
     loadIntrinsic(intrinsic_json_path,intrinsic,distortion,image_size);   //载入内参
-    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,cv::Size(image_size.x,image_size.y),0.0,cv::Size(image_size.x,image_size.y));    //根据内参与畸变系数计算去畸变后的内参
+    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,image_size,0.0,image_size);  //根据内参与畸变系数计算去畸变后的内参
     cv::Mat undistort_image;
     cv::undistort(image,undistort_image,intrinsic,distortion,undistort_intrinsic);  //图像去畸变
 

@@ -5,7 +5,7 @@
 #include"jsoncpp/json/json.h"
 
 //读取内参矩阵、畸变参数、图像大小
-void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion,cv::Point2i &image_size)
+void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion,cv::Size &image_size)
 {
 	Json::Reader reader;
 	Json::Value root;
@@ -50,7 +50,6 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 					float data=root["intrinsic"][i][j].asFloat();
 					intrinsic_vector.push_back(data);
 				}
-
 			}
 		}
 		else if(root["intrinsic"].size()==9)
@@ -96,8 +95,8 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 			return;
 		}
 		
-		image_size.x=root["image_size"][0].asInt();
-		image_size.y=root["image_size"][1].asInt();
+		image_size.width=root["image_size"][0].asInt();
+		image_size.height=root["image_size"][1].asInt();
 	}
 
 	intrinsic=cv::Mat(intrinsic_vector).clone().reshape(1,3);
@@ -141,6 +140,6 @@ void saveIntrinsic(const std::string &filename,cv::Mat undistort_intrinsic)
 	Json::StyledWriter sw;
 	os<<sw.write(root);
 	os.close();
-
+	
 	return;
 }

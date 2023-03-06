@@ -26,9 +26,9 @@ int main(int argc,char** argv)
     loadPoints(point_json_path,pixel_points,target_points); //载入像素坐标系以及目标坐标系中点的信息
 
     cv::Mat intrinsic,distortion;   //相机内参、畸变系数
-    cv::Point2i image_size; //相机内参对应的图像大小
+    cv::Size image_size; //相机内参对应的图像大小
     loadIntrinsic(intrinsic_json_path,intrinsic,distortion,image_size);   //载入内参矩阵、畸变参数、图像大小
-    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,cv::Size(image_size.x,image_size.y),0.0,cv::Size(image_size.x,image_size.y));    //根据内参与畸变系数计算去畸变后的内参
+    cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,image_size,0.0,image_size);    //根据内参与畸变系数计算去畸变后的内参
 
     cv::Mat extrinsic=cv::Mat::eye(4,4,CV_32FC1);   //相机到目标的外参
     cv::Mat rvec=cv::Mat::zeros(3,1,CV_64FC1);  //创建旋转矩阵
