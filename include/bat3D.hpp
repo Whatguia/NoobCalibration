@@ -115,6 +115,6 @@ cv::Mat getBoxBat3D(cv::Mat xyz_wlh_yaw)
     corners.at<float>(0,7)=point_data[0]+w22_new;
     corners.at<float>(1,7)=point_data[1]+l22_new;
     corners.at<float>(2,7)=point_data[2]-point_data[5]/2;
-
+    
     return corners;
 }

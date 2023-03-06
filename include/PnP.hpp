@@ -9,7 +9,7 @@
 void loadPoints(const std::string &filename,std::vector<cv::Point2f> &pixel_points,std::vector<cv::Point3f> &target_points)
 {
     Json::Reader reader;
-	Json::Value root;
+    Json::Value root;
     pixel_points.clear();
     target_points.clear();
 

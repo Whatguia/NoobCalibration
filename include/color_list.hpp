@@ -17,6 +17,6 @@ void initColorList(std::vector<cv::Scalar> &color_list)
     color_list.push_back(cv::Scalar(79,79,47));
     color_list.push_back(cv::Scalar(203,192,255));
     color_list.push_back(cv::Scalar(255,0,255));
-
+    
     return;
 }

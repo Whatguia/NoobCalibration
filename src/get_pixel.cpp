@@ -48,7 +48,7 @@ int main(int argc,char** argv)
     image=cv::imread(image_path);
     image_extend=cv::Mat::zeros(image.rows+100,image.cols+100,CV_8UC3);
     image.copyTo(image_extend(cv::Rect(50,50,image.cols,image.rows)));
-
+    
     cv::namedWindow(image_path);
     while(true)
     {

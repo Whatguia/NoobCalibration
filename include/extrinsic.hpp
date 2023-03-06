@@ -49,7 +49,6 @@ void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 					float data=root["rotation"][i][j].asFloat();
 					rotation.push_back(data);
 				}
-
 			}
 		}
 		else if(root["rotation"].size()==9)
@@ -153,6 +152,6 @@ void saveExtrinsic(const std::string &filename,cv::Mat extrinsic)
 	Json::StyledWriter sw;
 	os<<sw.write(root);
 	os.close();
-
+	
 	return;
 }
