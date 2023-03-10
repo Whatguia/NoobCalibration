@@ -10,10 +10,10 @@
             "request": "launch",
             "program": "${workspaceRoot}/bin/test",
             "args": [
-                "./data/test.jpg",
-                "./data/test.json",
-                "./data/test.json",
-                "./data/boxes.json"
+                "./data/ONCE/test.jpg",
+                "./data/ONCE/test.json",
+                "./data/ONCE/test.json",
+                "./data/ONCE/boxes.json"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
@@ -34,7 +34,8 @@
             "request": "launch",
             "program": "${workspaceRoot}/bin/get_pixel",
             "args": [
-                "./data/test.jpg",
+                "./data/image.jpg",
+                "./data/calibration.json"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
@@ -56,8 +57,8 @@
             "program": "${workspaceRoot}/bin/PnP",
             "args": [
                 "./data/points.json",
-                "./data/test.json",
-                "./data/test.json",
+                "./data/calibration.json",
+                "./data/calibration.json",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
