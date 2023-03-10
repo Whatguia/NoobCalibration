@@ -4,12 +4,14 @@
 #include<opencv2/opencv.hpp>
 #include"jsoncpp/json/json.h"
 
-//读取内参矩阵、畸变参数、图像大小
-void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion,cv::Size &image_size)
+//读取内参矩阵、畸变参数、图像大小，默认读取的是去畸变后的图像再次标定的内参"undistort_intrinsic"以及畸变参数"undistort_distortion"，如果需要读取内参"intrinsic"以及畸变系数"distortion"，请将undistort参数设置为false
+void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion,cv::Size &image_size,bool undistort=true)
 {
 	Json::Reader reader;
 	Json::Value root;
 	std::vector<float> intrinsic_vector,distortion_vector;
+	const std::string intrinsic_key=undistort?"undistort_intrinsic":"intrinsic";
+	const std::string distortion_key=undistort?"undistort_distortion":"distortion";
 
 	std::ifstream is(filename,std::ios::binary);
 	if(!is.is_open())
@@ -21,63 +23,63 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 	if(reader.parse(is,root))
 	{
 		//read intrinsic[9] or intrinsic[3][3]
-		if(root["intrinsic"].isNull()||root["intrinsic"].type()!=Json::arrayValue)
+		if(root[intrinsic_key].isNull()||root[intrinsic_key].type()!=Json::arrayValue)
 		{
-			std::cout<<"Error intrinsic type:"<<filename<<std::endl;
+			std::cout<<"Error "<<intrinsic_key<<" type:"<<filename<<std::endl;
 			is.close();
 			return;
 		}
 
-		if(root["intrinsic"].size()==3)
+		if(root[intrinsic_key].size()==3)
 		{
-			for(unsigned int i=0;i<root["intrinsic"].size();i++)
+			for(unsigned int i=0;i<root[intrinsic_key].size();i++)
 			{
-				if(root["intrinsic"][i].isNull()||root["intrinsic"][i].type()!=Json::arrayValue)
+				if(root[intrinsic_key][i].isNull()||root[intrinsic_key][i].type()!=Json::arrayValue)
 				{
-					std::cout<<"Error intrinsic type:"<<filename<<":"<<i<<std::endl;
+					std::cout<<"Error "<<intrinsic_key<<" type:"<<filename<<":"<<i<<std::endl;
 					is.close();
 					return;
 				}
-				if(root["intrinsic"][i].size()!=3)
+				if(root[intrinsic_key][i].size()!=3)
 				{
-					std::cout<<"Error intrinsic size:"<<filename<<":"<<i<<std::endl;
+					std::cout<<"Error "<<intrinsic_key<<" size:"<<filename<<":"<<i<<std::endl;
 					is.close();
 					return;
 				}
 				
-				for(unsigned int j=0;j<root["intrinsic"][i].size();j++)
+				for(unsigned int j=0;j<root[intrinsic_key][i].size();j++)
 				{
-					float data=root["intrinsic"][i][j].asFloat();
+					float data=root[intrinsic_key][i][j].asFloat();
 					intrinsic_vector.push_back(data);
 				}
 			}
 		}
-		else if(root["intrinsic"].size()==9)
+		else if(root[intrinsic_key].size()==9)
 		{
-			for(unsigned int i=0;i<root["intrinsic"].size();i++)
+			for(unsigned int i=0;i<root[intrinsic_key].size();i++)
 			{
-				float data=root["intrinsic"][i].asFloat();
+				float data=root[intrinsic_key][i].asFloat();
 				intrinsic_vector.push_back(data);
 			}
 		}
 		else
 		{
-			std::cout<<"Error intrinsic size:"<<filename<<std::endl;
+			std::cout<<"Error "<<intrinsic_key<<" size:"<<filename<<std::endl;
 			is.close();
 			return;
 		}
 
 		//read distortion[]
-		if(root["distortion"].isNull()||root["distortion"].type()!=Json::arrayValue)
+		if(root[distortion_key].isNull()||root[distortion_key].type()!=Json::arrayValue)
 		{
-			std::cout<<"Error distortion type:"<<filename<<std::endl;
+			std::cout<<"Error "<<distortion_key<<" type:"<<filename<<std::endl;
 			is.close();
 			return;
 		}
 		
-		for(unsigned int i=0;i<root["distortion"].size();i++)
+		for(unsigned int i=0;i<root[distortion_key].size();i++)
 		{
-			double data=root["distortion"][i].asFloat();
+			double data=root[distortion_key][i].asFloat();
 			distortion_vector.push_back(data);
 		}
 
@@ -102,44 +104,5 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 	intrinsic=cv::Mat(intrinsic_vector).clone().reshape(1,3);
 	distortion=cv::Mat(distortion_vector).clone().reshape(1,1);
 	is.close();
-	return;
-}
-
-//保存去畸变后的内参
-void saveIntrinsic(const std::string &filename,cv::Mat undistort_intrinsic)
-{
-	Json::Reader reader;
-	Json::Value root;
-
-	std::ifstream is(filename,std::ios::binary);
-	if(!is.is_open())
-	{
-		std::cout<<"Error opening file:"<<filename<<std::endl;
-		return;
-	}
-
-	if(reader.parse(is,root))
-	{
-		Json::Value undistort_intrinsic_obj;
-		for(int i=0;i<9;i++)
-		{
-			undistort_intrinsic_obj.append(undistort_intrinsic.at<float>(i/3,i%3));
-		}
-
-		root["undistort_intrinsic"]=undistort_intrinsic_obj;
-	}
-	is.close();
-
-	std::ofstream os;
-	os.open(filename,std::ios::out);
-	if (!os.is_open())
-	{
-		std::cout<<"Error opening file:"<<filename<<std::endl;
-		return;
-	}
-	Json::StyledWriter sw;
-	os<<sw.write(root);
-	os.close();
-	
 	return;
 }

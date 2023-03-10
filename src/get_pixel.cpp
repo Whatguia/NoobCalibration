@@ -1,5 +1,6 @@
 #include<iostream>
 #include<opencv2/opencv.hpp>
+#include"intrinsic.hpp"
 
 cv::Mat image;
 cv::Mat image_extend;
@@ -36,17 +37,31 @@ void on_mouse(int event,int x,int y,int flags,void *ustc)
 
 int main(int argc,char** argv)
 {
-    if(argc!=2)
+    if(argc!=2&&argc!=3)
 	{
-	    std::cout<<"Usage: ./Get_Pixel <image_path>\n"
+	    std::cout<<"Usage: ./get_pixel <image_path> Optional:<intrinsic_json_path>\n"
 				"example:\n"
-				"\t./bin/Get_Pixel ./data/test.jpg"
+				"\t./bin/get_pixel ./data/undistorted_image.jpg\n"
+                "or:\n"
+                "\t./bin/get_pixel ./data/image.jpg ./data/calibration.json"
                 <<std::endl;
 		return 0;
 	}
     std::string image_path=argv[1];
     image=cv::imread(image_path);
     image_extend=cv::Mat::zeros(image.rows+100,image.cols+100,CV_8UC3);
+
+    if(argc==3)
+    {
+        std::string intrinsic_json_path=argv[2];    //内参json文件路径
+        cv::Mat intrinsic,distortion;   //相机内参、畸变系数
+        cv::Size image_size; //相机内参对应的图像大小
+        cv::Mat undistorted_image;
+        loadIntrinsic(intrinsic_json_path,intrinsic,distortion,image_size,false);   //载入原始内参矩阵、畸变参数、图像大小
+        cv::undistort(image,undistorted_image,intrinsic,distortion);
+        image=undistorted_image;
+    }
+
     image.copyTo(image_extend(cv::Rect(50,50,image.cols,image.rows)));
     
     cv::namedWindow(image_path);

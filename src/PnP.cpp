@@ -11,9 +11,9 @@ int main(int argc,char** argv)
 	{
 		std::cout<<"Usage: ./PnP <points_json_path> <intrinsic_json_path> Optional:<extrinsic_json_path>\n"
 				"example:\n"
-				"\t./bin/PnP ./data/points.json ./data/test.json\n"
+				"\t./bin/PnP ./data/points.json ./data/calibration.json\n"
                 "or:\n"
-                "\t./bin/PnP ./data/points.json ./data/test.json ./data/test.json"
+                "\t./bin/PnP ./data/points.json ./data/calibration.json ./data/calibration.json"
                 <<std::endl;
 		return 0;
 	}
@@ -27,7 +27,7 @@ int main(int argc,char** argv)
 
     cv::Mat intrinsic,distortion;   //相机内参、畸变系数
     cv::Size image_size; //相机内参对应的图像大小
-    loadIntrinsic(intrinsic_json_path,intrinsic,distortion,image_size);   //载入内参矩阵、畸变参数、图像大小
+    loadIntrinsic(intrinsic_json_path,intrinsic,distortion,image_size); //载入去畸变后的图像再次标定的内参矩阵、畸变参数、图像大小
     cv::Mat undistort_intrinsic=cv::getOptimalNewCameraMatrix(intrinsic,distortion,image_size,0.0,image_size);    //根据内参与畸变系数计算去畸变后的内参
 
     cv::Mat extrinsic=cv::Mat::eye(4,4,CV_32FC1);   //相机到目标的外参
@@ -115,17 +115,7 @@ int main(int argc,char** argv)
     {
         //当可选参数<extrinsic_json_path>启用时，更新外参文件中的信息
         saveExtrinsic(extrinsic_json_path,extrinsic.inv());
-        saveIntrinsic(extrinsic_json_path,undistort_intrinsic);
     }
 
-    // int x,y,z;
-    // std::cout<<"输入世界坐标:"<<std::endl;
-    // while (std::cin>>x>>y>>z)
-    // {
-    //     std::cout<<x<<" "<<y<<" "<<z<<" "<<std::endl;
-    //     cv::Point2f pix=project_point(cv::Point3f(x,y,z),projection_matrix);
-        
-    //     std::cout<<"像素坐标:"<< pix <<std::endl<<pix.x<<" "<<pix.y<<std::endl;
-    // }
     return 0;
 }
