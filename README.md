@@ -149,7 +149,8 @@ cd {NoobCalibration_path}
 
 6. 标定完成
 
-<img src="./docs/result.jpg" width="100%" height="100%"><br></br>
+<img src="./docs/result.png" width="50%" height="50%">
+<img src="./docs/projection.jpg" width="100%" height="100%"><br></br>
 
 #
 ## 关于结果的验证
