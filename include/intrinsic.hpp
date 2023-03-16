@@ -4,14 +4,14 @@
 #include<opencv2/opencv.hpp>
 #include"jsoncpp/json/json.h"
 
-//读取内参矩阵、畸变参数、图像大小，默认读取的是去畸变后的图像再次标定的内参"undistort_intrinsic"以及畸变参数"undistort_distortion"，如果需要读取内参"intrinsic"以及畸变系数"distortion"，请将undistort参数设置为false
-void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion,cv::Size &image_size,bool undistort=true)
+//读取内参矩阵、畸变参数、图像大小，默认读取的是去畸变后的图像再次标定的内参"undistort_intrinsic"以及畸变参数"undistort_distortion"，如果需要读取内参"intrinsic"以及畸变系数"distortion"，请将undistorted参数设置为false
+void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &distortion,cv::Size &image_size,bool undistorted=true)
 {
 	Json::Reader reader;
 	Json::Value root;
 	std::vector<float> intrinsic_vector,distortion_vector;
-	const std::string intrinsic_key=undistort?"undistort_intrinsic":"intrinsic";
-	const std::string distortion_key=undistort?"undistort_distortion":"distortion";
+	const std::string intrinsic_key=undistorted?"undistort_intrinsic":"intrinsic";
+	const std::string distortion_key=undistorted?"undistort_distortion":"distortion";
 
 	std::ifstream is(filename,std::ios::binary);
 	if(!is.is_open())

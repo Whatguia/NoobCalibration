@@ -12,9 +12,9 @@ int main(int argc,char** argv)
 	{
 		std::cout<<"Usage: ./test <image_path> <intrinsic_json_path> <extrinsic_json_path> Optional:<boxes_json_path>\n"
 				"example:\n"
-				"\t./bin/test ./data/ONCE/test.jpg ./data/ONCE/test.json ./data/ONCE/test.json\n"
+				"\t./bin/test ./data/test.jpg ./data/test.json ./data/test.json\n"
                 "or:\n"
-				"\t./bin/test ./data/ONCE/test.jpg ./data//ONCEtest.json ./data/ONCE/test.json ./data/ONCE/boxes.json"
+				"\t./bin/test ./data/test.jpg ./data/test.json ./data/test.json ./data/boxes.json"
                 <<std::endl;
 		return 0;
 	}

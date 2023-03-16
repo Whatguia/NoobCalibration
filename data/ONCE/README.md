@@ -14,14 +14,14 @@ ONCE
 ### 外参计算
 ```shell
 cd {NoobCalibration_path}
-./bin/PnP ./data/ONCE/points.json ./data/ONCE/test.json ./data/ONCE/test.json
+./bin/PnP ./data/points.json ./data/test.json ./data/test.json
 ```
-外参计算结果会被打印并保存至`./data/ONCE/test.json`中
+外参计算结果会被打印并保存至`./data/test.json`中
 ### 计算结果投影对比
 ```shell
 cd {NoobCalibration_path}
 #我们的标定结果
-./bin/test ./data/ONCE/test.jpg ./data/ONCE/test.json ./data/ONCE/test.json ./data/ONCE/boxes.json
+./bin/test ./data/test.jpg ./data/test.json ./data/test.json ./data/boxes.json
 ```
 
 <img src="./docs/test.jpg" width="100%" height="100%" alt="我们的标定结果" div align=center /><br></br>
