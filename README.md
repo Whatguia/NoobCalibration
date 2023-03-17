@@ -121,9 +121,9 @@ python3 ./script/undistort.py {原始图像目录路径} {输出去畸变图像�
 
 ```shell
 cd {NoobCalibration_path}
-./bin/get_pixel {图像路径}
+./bin/get_pixel {去畸变后的图像路径}
 #或
-./bin/get_pixel {图像路径} {标定参数文件路径}
+./bin/get_pixel {原始图像路径} {标定参数文件路径}
 ```
 
 * 第二个参数`{标定参数文件路径}`使用了`标定参数文件`中的`"intrinsic"`字段以及`"distortion`字段来对图像进行去畸变处理，如果输入的图像已经经过去畸变处理，则不应该输入此参数。
