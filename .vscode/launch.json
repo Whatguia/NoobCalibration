@@ -5,30 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name":"test(gdp)启动",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceRoot}/bin/test",
-            "args": [
-                "./data/ONCE/test.jpg",
-                "./data/ONCE/test.json",
-                "./data/ONCE/test.json",
-                "./data/ONCE/boxes.json"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceRoot}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "为 gdb 启用整齐打印",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
             "name":"get_pixel(gdp)启动",
             "type": "cppdbg",
             "request": "launch",
@@ -59,6 +35,30 @@
                 "./data/points.json",
                 "./data/calibration.json",
                 "./data/calibration.json",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name":"test(gdp)启动",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/data/ONCE/bin/once_test",
+            "args": [
+                "./data/ONCE/data/test.jpg",
+                "./data/ONCE/data/test.json",
+                "./data/ONCE/data/test.json",
+                "./data/ONCE/data/boxes.json"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
