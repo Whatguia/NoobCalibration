@@ -26,6 +26,7 @@ void on_mouse(int event,int x,int y,int flags,void *ustc)
     cv::line(resize_image,cv::Point(605,405),cv::Point(805,205),cv::Scalar(0,255,0));
     cv::circle(resize_image,cv::Point(505,505),10,cv::Scalar(0,0,255));
     cv::circle(resize_image,cv::Point(505,505),250,cv::Scalar(0,0,255));
+    cv::putText(resize_image,"["+std::to_string(x)+","+std::to_string(y)+"]",cv::Point(515,495),cv::FONT_HERSHEY_PLAIN,1,cv::Scalar(0,255,0));
     
     if(event==cv::EVENT_LBUTTONDOWN)
     {
