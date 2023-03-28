@@ -5,8 +5,8 @@
 #include"jsoncpp/json/json.h"
 #include"projection.hpp"
 
-//读取像素坐标系以及目标坐标系下的点对
-void loadPoints(const std::string &filename,std::vector<cv::Point2f> &pixel_points,std::vector<cv::Point3f> &target_points)
+//读取各项配置和像素坐标系以及目标坐标系下的点对
+bool loadConfig(const std::string &filename,std::vector<cv::Point2d> &pixel_points,std::vector<cv::Point3d> &target_points,bool &useExtrinsicGuess,int &iterationsCount,float &reprojectionError,double &confidence,int &flags)
 {
     Json::Reader reader;
     Json::Value root;
@@ -17,57 +17,67 @@ void loadPoints(const std::string &filename,std::vector<cv::Point2f> &pixel_poin
 	if(!is.is_open())
 	{
 		std::cout<<"Error opening file:"<<filename<<std::endl;
-		return;
+		return false;
 	}
 
 	if(reader.parse(is,root))
 	{
-		if(root["pixel_points"].isNull()||root["pixel_points"].type()!=Json::arrayValue||root["target_points"].isNull()||root["target_points"].type()!=Json::arrayValue)
+        useExtrinsicGuess=(root["useExtrinsicGuess"].isNull()||root["useExtrinsicGuess"].type()!=Json::booleanValue)?false:root["useExtrinsicGuess"].asBool();
+        iterationsCount=(root["iterationsCount"].isNull()||root["iterationsCount"].type()!=Json::intValue)?100:root["iterationsCount"].asInt();
+        reprojectionError=(root["reprojectionError"].isNull()||root["reprojectionError"].type()!=Json::realValue)?8.0:root["reprojectionError"].asFloat();
+        confidence=(root["confidence"].isNull()||root["confidence"].type()!=Json::realValue)?0.9899999999999999911:root["confidence"].asDouble();
+        flags=(root["flags"].isNull()||root["flags"].type()!=Json::intValue)?1:root["flags"].asInt();
+
+		if(root["points"].isNull()||root["points"].type()!=Json::objectValue)
 		{
             std::cout<<"Error points type:"<<filename<<std::endl;
 			is.close();
-			return;
+			return false;
         }
-        if(root["pixel_points"].size()!=root["target_points"].size())
-        {
-            std::cout<<"Error size of pixel_points and target_points:"<<filename<<std::endl;
-            is.close();
-            return;
-        }
-        
-        for(unsigned int i=0;i<root["pixel_points"].size();i++)
-        {
-            if(root["pixel_points"][i].isNull()||root["pixel_points"][i].type()!=Json::arrayValue||root["target_points"][i].isNull()||root["target_points"][i].type()!=Json::arrayValue)
-            {
-                std::cout<<"Error point type:"<<filename<<":"<<i<<std::endl;
-                is.close();
-                return;
-            }
-            if(root["pixel_points"][i].size()!=2||root["target_points"][i].size()!=3)
-            {
-                std::cout<<"Error point size:"<<filename<<":"<<i<<std::endl;
-                is.close();
-                return;
-            }
 
-            pixel_points.push_back(cv::Point2f(root["pixel_points"][i][0].asFloat(),root["pixel_points"][i][1].asFloat()));
-            target_points.push_back(cv::Point3f(root["target_points"][i][0].asFloat(),root["target_points"][i][1].asFloat(),root["target_points"][i][2].asFloat()));
+        Json::Value::Members points=root["points"].getMemberNames();
+        for(const std::string point:points)
+        {
+            if(root["points"][point].isNull()||root["points"][point].type()!=Json::arrayValue)
+            {
+                std::cout<<"Error point type:"<<filename<<":"<<point<<std::endl;
+                is.close();
+                return false;
+            }
+            for(unsigned int i=0;i<root["points"][point].size();i++)
+            {
+                if(root["points"][point][i].isNull()||root["points"][point][i].type()!=Json::arrayValue)
+                {
+                    std::cout<<"Error point type:"<<filename<<":"<<point<<":"<<i<<std::endl;
+                    is.close();
+                    return false;
+                }
+                if(root["points"][point][i].size()!=5)
+                {
+                    std::cout<<"Error point size:"<<filename<<":"<<point<<":"<<i<<std::endl;
+                    is.close();
+                    return false;
+                }
+
+                pixel_points.push_back(cv::Point2d(root["points"][point][i][0].asDouble(),root["points"][point][i][1].asDouble()));
+                target_points.push_back(cv::Point3d(root["points"][point][i][2].asDouble(),root["points"][point][i][3].asDouble(),root["points"][point][i][4].asDouble()));
+            }
         }
     }
 
 	is.close();
-	return;
+	return true;
 }
 
-//根据目标坐标系中的点与投影矩阵，计算重投影在像素坐标系下的点的坐标，然后计算其与输入的像素坐标系中的点的距离，以获取重投影误差
-std::vector<float> getProjectionError(std::vector<cv::Point2f> &pixel_points,std::vector<cv::Point3f> &target_points,cv::Mat projection_matrix)
+//根据目标坐标系中的点与投影矩阵，计算重投影在像素坐标系下的点的坐标，然后计算其与输入的像素坐标系中的点的距离，以获取投影误差
+std::vector<double> getProjectionError(std::vector<cv::Point2d> &pixel_points,std::vector<cv::Point3d> &target_points,cv::Mat projection_matrix)
 {
-    std::vector<float> projection_error;
+    std::vector<double> projection_error;
     projection_error.clear();
 
     for(size_t i=0;i<target_points.size();i++)
     {
-        cv::Point2f projection_point=ProjectPoint(target_points[i],projection_matrix);
+        cv::Point2d projection_point=ProjectPoint(target_points[i],projection_matrix);
         projection_error.push_back(sqrt(pow(pixel_points[i].x-projection_point.x,2)+pow(pixel_points[i].y-projection_point.y,2)));
     }
 

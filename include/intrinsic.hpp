@@ -9,7 +9,7 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 {
 	Json::Reader reader;
 	Json::Value root;
-	std::vector<float> intrinsic_vector,distortion_vector;
+	std::vector<double> intrinsic_vector,distortion_vector;
 	const std::string intrinsic_key=undistorted?"undistort_intrinsic":"intrinsic";
 	const std::string distortion_key=undistorted?"undistort_distortion":"distortion";
 
@@ -49,7 +49,7 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 				
 				for(unsigned int j=0;j<root[intrinsic_key][i].size();j++)
 				{
-					float data=root[intrinsic_key][i][j].asFloat();
+					double data=root[intrinsic_key][i][j].asDouble();
 					intrinsic_vector.push_back(data);
 				}
 			}
@@ -58,7 +58,7 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 		{
 			for(unsigned int i=0;i<root[intrinsic_key].size();i++)
 			{
-				float data=root[intrinsic_key][i].asFloat();
+				double data=root[intrinsic_key][i].asDouble();
 				intrinsic_vector.push_back(data);
 			}
 		}
@@ -79,7 +79,7 @@ void loadIntrinsic(const std::string &filename,cv::Mat &intrinsic,cv::Mat &disto
 		
 		for(unsigned int i=0;i<root[distortion_key].size();i++)
 		{
-			double data=root[distortion_key][i].asFloat();
+			double data=root[distortion_key][i].asDouble();
 			distortion_vector.push_back(data);
 		}
 

@@ -9,7 +9,7 @@ void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 {
 	Json::Reader reader;
 	Json::Value root;
-	std::vector<float> extrinsic_vector,rotation,translation;
+	std::vector<double> extrinsic_vector,rotation,translation;
 
 	std::ifstream is(filename,std::ios::binary);
 	if(!is.is_open())
@@ -46,7 +46,7 @@ void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 
 				for(unsigned int j=0;j<root["rotation"][i].size();j++)
 				{
-					float data=root["rotation"][i][j].asFloat();
+					double data=root["rotation"][i][j].asDouble();
 					rotation.push_back(data);
 				}
 			}
@@ -55,7 +55,7 @@ void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 		{
 			for(unsigned int i=0;i<root["rotation"].size();i++)
 			{
-				float data=root["rotation"][i].asFloat();
+				double data=root["rotation"][i].asDouble();
 				rotation.push_back(data);
 			}
 		}
@@ -71,15 +71,15 @@ void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 		{
 			for(unsigned int i=0;i<root["translation"].size();i++)
 			{
-				float data=root["translation"][i].asFloat();
+				double data=root["translation"][i].asDouble();
 				translation.push_back(data);
 			}
 		}
 		else if(!root["translation"].isNull()&&root["translation"].type()==Json::objectValue)
 		{
-			float x=root["translation"]["x"].asFloat();
-			float y=root["translation"]["y"].asFloat();
-			float z=root["translation"]["z"].asFloat();
+			double x=root["translation"]["x"].asDouble();
+			double y=root["translation"]["y"].asDouble();
+			double z=root["translation"]["z"].asDouble();
 			translation.push_back(x);
 			translation.push_back(y);
 			translation.push_back(z);
@@ -111,7 +111,7 @@ void loadExtrinsic(const std::string &filename,cv::Mat &extrinsic)
 }
 
 //修改并保存外参，仅修改外参部分（平移和旋转）
-void saveExtrinsic(const std::string &filename,cv::Mat extrinsic)
+bool saveExtrinsic(const std::string &filename,cv::Mat extrinsic)
 {
 	Json::Reader reader;
 	Json::Value root;
@@ -120,7 +120,7 @@ void saveExtrinsic(const std::string &filename,cv::Mat extrinsic)
 	if(!is.is_open())
 	{
 		std::cout<<"Error opening file:"<<filename<<std::endl;
-		return;
+		return false;
 	}
 
 	if(reader.parse(is,root))
@@ -128,13 +128,13 @@ void saveExtrinsic(const std::string &filename,cv::Mat extrinsic)
 		Json::Value rotation_obj;
 		for(int i=0;i<9;i++)
 		{
-			rotation_obj.append(extrinsic.at<float>(i/3,i%3));
+			rotation_obj.append(extrinsic.at<double>(i/3,i%3));
 		}
 
 		Json::Value translation_obj;
 		for(int i=0;i<3;i++)
 		{
-			translation_obj.append(extrinsic.at<float>(i,3));
+			translation_obj.append(extrinsic.at<double>(i,3));
 		}
 
 		root["rotation"]=rotation_obj;
@@ -147,11 +147,11 @@ void saveExtrinsic(const std::string &filename,cv::Mat extrinsic)
 	if (!os.is_open())
 	{
 		std::cout<<"Error opening file:"<<filename<<std::endl;
-		return;
+		return false;
 	}
 	Json::StyledWriter sw;
-	os<<sw.write(root);
+	os<<sw.write(root)<<std::flush;
 	os.close();
 	
-	return;
+	return true;
 }
