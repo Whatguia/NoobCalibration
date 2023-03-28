@@ -60,7 +60,7 @@ cv::Mat getBox(cv::Mat xyz_wlh_yaw)
 {
     double* point_data=xyz_wlh_yaw.ptr<double>(0);
 
-    cv::Mat corners(3,8,CV_32FC1);
+    cv::Mat corners(3,8,CV_64FC1);
     
     //根据目标框的长宽高生成目标框的8个顶点
     double* x=corners.ptr<double>(0);
