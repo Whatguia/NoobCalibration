@@ -55,26 +55,55 @@ make
    "translation" : 平移向量，表示该传感器在目标的坐标系下的平移 [x,y,z]
 }
 ```
+需要手动填写的键值对
+* "image_size":[2]
+* "intrinsic":[9] or [3,3]
+* "distortion":[4] or [5]
+* "undistort_intrinsic":[9] or [3,3]
+* "undistort_distortion":[4] or [5]
+* "target":string
+
+工具自动保存的键值对
+* "rotation":[9] or [3,3]
+* "translation":[3]
+
+该工具中未使用的键值对（可删除的）
+* "channel":string
+* "modality":string
 
 ```
-点对文件，可以参考{NoobCalibration_path}/data/points.json
+标定配置文件，可以参考{NoobCalibration_path}/data/config.json
 {
-    "target_points" : 点云坐标系下点的坐标，注意顺序要与像素坐标系下点的坐标对应，
-    [
-        [x1,y1,z1],
-        [x2,y2,z2],
-        ...
-        [xn,yn,zn]     
-    ],
-    "pixel_points" : 像素坐标系下点的坐标，注意顺序要与点云坐标系下点的坐标对应
-    [
-        [u1,v1],
-        [u2,v2],
-        ...
-        [un,vn]
-    ]
+    "useExtrinsicGuess": 用于SOLVEPNP_ITERATIVE的参数，如果为true，则函数使用所提供的rvec和tvec值分别作为旋转向量和平移向量的初始近似值，并进一步优化它们,
+    "iterationsCount": RANSAC算法的迭代次数，这只是初始值，根据估计外点的概率，可以进一步缩小迭代次数；（此值函数内部是会不断改变的）,所以一开始可以赋一个大的值,
+    "reprojectionError": RANSAC过程使用的观测点投影和计算点投影之间允许的最大距离，以将其视为内投影,
+    "confidence": 算法产生有用结果的概率,
+    "flags": 解决PnP问题的方法,
+    "points": { 不同时间戳下选取的像素坐标系以及点云坐标系下点的坐标
+        "000000": [ 选取时对应的时间戳或文件名，仅作标识使用
+            [u1,v1,x1,y1,z1], 像素坐标系以及点云坐标系下点的坐标，其中ux、uy代表像素坐标系下的点的坐标，x、y、z代表点云坐标系下的点的坐标,
+            [u2,v2,x2,y2,z2],
+            ...
+            [un,vn,xn,yn,zn]
+        ],
+        "000150": [
+            [u1,v1,x1,y1,z1],
+            [u2,v2,x2,y2,z2],
+            ...
+            [un,vn,xn,yn,zn]
+        ]
+    }
 }
 ```
+必要的键值对
+* "points":{key:[n,5]}
+
+可省略的键值对（可删除的，如果被删除的话，则会使用默认值进行标定配置）
+* "useExtrinsicGuess":bool
+* "iterationsCount":int
+* "reprojectionError":float
+* "confidence":double
+* "flags":int
 
 #
 ## 标定流程
@@ -112,7 +141,7 @@ python3 ./script/undistort.py {原始图像目录路径} {输出去畸变图像�
 
 <img src="./docs/camera.jpg" width="50%" height="50%"><br></br>
 
-2. 然后使用[`CloudCompare`](https://github.com/CloudCompare/CloudCompare)浏览`步骤1`中对应点云数据，检查在点云和图像中是否都能找到一个明显的`物体边界点`或者`棋盘格角点`，可以的话则使用`选点`功能选择对应的点，并将其记录在`点对文件`中的`"target_points"`字段。
+2. 然后使用[`CloudCompare`](https://github.com/CloudCompare/CloudCompare)浏览`步骤1`中对应点云数据，检查在点云和图像中是否都能找到一个明显的`物体边界点`或者`棋盘格角点`，可以的话则使用`选点`功能选择对应的点的坐标[x,y,z]，并将其记录在`标定配置文件`中的`"points"`字段。
 
 <img src="./docs/cloudcompare.jpg" width="25%" height="25%"/>
 <img src="./docs/pointcloud.png" width="50%" height="50%"/><br></br>
@@ -126,26 +155,23 @@ cd {NoobCalibration_path}
 ./bin/get_pixel {原始图像路径} {标定参数文件路径}
 ```
 
-* 第二个参数`{标定参数文件路径}`使用了`标定参数文件`中的`"intrinsic"`字段以及`"distortion`字段来对图像进行去畸变处理，如果输入的图像已经经过去畸变处理，则不应该输入此参数。
+* 第二个参数`{标定参数文件路径}`使用了`标定参数文件`中的`"intrinsic"`字段、`"distortion`字段以及`"image_size"`字段来对图像进行去畸变处理，如果输入的图像已经经过去畸变处理，则不应该输入此参数。
 
-* 启动之后在打开的图像窗口中，用鼠标缓慢移动同时观察放大的图像中准心的位置，当准心位置在与步骤2中选择的点对应的像素点上时，单击鼠标左键，在终端中则会打印该像素点的坐标[u,v]，并将其记录在`点对文件`中的`"pixel_points"`字段。
+* 启动之后在打开的图像窗口中，用鼠标缓慢移动同时观察放大的图像中准心的位置，当准心位置在与步骤2中选择的点对应的像素点上时，单击鼠标左键，在终端中则会打印该像素点的坐标[u,v]，并将其记录在`标定配置文件`中的`"points"`字段。
 
 <img src="./docs/getpixel.png" width="100%" height="100%"><br></br>
 
-4. 重复`步骤1、2、3`，至少选择`4对`以上的点对，确保有足够多的点对来进行PnP的计算。
+4. 重复`步骤1、2、3`，在同一个时间戳对应的图像和点云中至少选择`4对共面的点对（即选择的点对都位于标定板上）`，并浏览其他时间戳时的数据以选择`分布在图像中不同位置、在点云中不同距离`的点对。
 
 5. 计算PnP
 
 ```shell
 cd {NoobCalibration_path}
-./bin/PnP {点对文件路径} {标定参数文件路径}
-#或
-./bin/PnP {点对文件路径} {标定参数文件路径} {标定参数文件路径}
+./bin/PnP {标定配置文件路径} {标定参数文件路径}
 ```
+* 第一个参数`{标定配置文件路径}`中，如果对可省略的键值对的定义不清楚的话，可以参考[solvePnPRansac](https://docs.opencv.org/4.2.0/d9/d0c/group__calib3d.html#ga50620f0e26e02caa2e9adc07b5fbf24e)以及[solvePnPRansac](https://docs.opencv.org/4.2.0/d9/d0c/group__calib3d.html#ga549c2075fac14829ff4a58bc931c033d)，或直接删除该键值对使外参计算时使用默认值
 
-* 第二个参数`{标定参数文件路径}`仅使用了文件中的内参以及畸变参数；
-
-* 带有第三个参数`{标定参数文件路径}`时，会将文件中的外参作为初值（可为空）进行PnP计算，并且会将相机到激光雷达的外参计算结果更新保存到文件中；而不带有第三个参数时则不会保存外参计算结果。
+* 第二个参数`{标定参数文件路径}`使用了`标定参数文件`中的`"intrinsic"`字段、`"distortion`字段以及`"image_size"`字段来进行外参计算，并且会将外参计算结果更新保存到`标定参数文件`中。
 
 6. 标定完成
 
@@ -155,19 +181,17 @@ cd {NoobCalibration_path}
 #
 ## 关于结果的验证
 
-可以使用[SensorsCalibration](https://github.com/PJLab-ADG/SensorsCalibration)中`lidar2camera/manual_calib`模块，或者使用适配我们参数格式的[manual_calib](https://github.com/TankGewehr/manual_calib)修改版本，根据标定结果将同一帧点云投影到图像上，查看点云是否和图像吻合以进行验证。
+可以使用[SensorsCalibration](https://github.com/PJLab-ADG/SensorsCalibration)中`lidar2camera/manual_calib`模块，或者使用适配我们参数格式的[manual_calib](https://github.com/TankGewehr/manual_calib)修改版本，根据标定结果将同一帧点云投影到图像上，观察它们是否对齐。
 
 需要注意的是`SensorsCalibration`中默认使用的是激光雷达到相机的外参，我们默认保存的外参标定结果时相机到激光雷达的外参，因此需要将其组合成外参矩阵，然后计算其逆矩阵作为外参输入，如果使用适配我们参数格式的`manual_calib`则不需要考虑这个问题。
 
 ## 关于点对的数量
 
-PnP计算最少需要的点对数量为4，这也是为什么要求至少选择`4对`以上的点对，虽然在测试数据上我们仅选择了6对点对，但是在实际标定过程中建议选择10到20对`分布在图像中不同位置、在点云中不同距离`的点对，这样的话在计算PnP后可以删掉重投影误差较大的点。
+PnP计算最少需要的点对数量为4，这也是为什么要求至少选择`4对共面的点对`，在实际标定过程中建议选择20到40对`分布在图像中不同位置、在点云中不同距离`的点对，这样的话在计算PnP后可以删掉投影误差较大的点（如果投影误差较大，则可能是错误的点对）。
 
-## 关于重投影误差
+## 关于投影误差
 
-重投影误差是根据外参的计算结果与标定出的相机内参矩阵，与点对中的3D点进行运算得到新的2D点（重投影），将重投影的点与原本点对中的2D点进行比较的结果；
-
-注意该重投影误差只代表`外参的计算结果`与`选取的点对中各个点`的关系，和外参与实际值的误差没有直接联系，因此该重投影误差仅供参考。
+投影误差是根据`内参标定`结果与`外参计算`结果，与点对中的3D点进行运算得到新的2D点，将新的2D点与原本点对中的2D点进行比较的结果，和外参与实际值的误差没有直接联系,该投影误差仅供参考；
 
 ## 关于外参与实际值的误差
 
