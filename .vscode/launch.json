@@ -32,9 +32,8 @@
             "request": "launch",
             "program": "${workspaceRoot}/bin/PnP",
             "args": [
-                "./data/points.json",
-                "./data/calibration.json",
-                "./data/calibration.json",
+                "./data/config.json",
+                "./data/calibration.json"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
