@@ -1,5 +1,4 @@
-points_json_path="./data/points.json"
-intrinsic_json_path="./data/calibration.json"
-extrinsic_json_path="./data/calibration.json"
+config_json_path="./data/config.json"
+intrinsic_and_extrinsic_json_path="./data/calibration.json"
 
-./bin/PnP $points_json_path $intrinsic_json_path $extrinsic_json_path
+./bin/PnP $config_json_path $intrinsic_and_extrinsic_json_path
