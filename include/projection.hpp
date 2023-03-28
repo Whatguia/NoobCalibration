@@ -9,19 +9,19 @@ cv::Mat eular_to_matrix(double roll,double pitch,double yaw)
     x.push_back(1.0);x.push_back(0.0);x.push_back(0.0);
     x.push_back(0.0);x.push_back(cos(roll));x.push_back(-sin(roll));
     x.push_back(0.0);x.push_back(sin(roll));x.push_back(cos(roll));
-    cv::Mat rotX(cv::Size(3,3),CV_32FC1,x.data());
+    cv::Mat rotX(cv::Size(3,3),CV_64FC1,x.data());
 
     std::vector<double> y;
     y.push_back(cos(pitch));y.push_back(0.0);y.push_back(sin(pitch));
     y.push_back(0.0);y.push_back(1.0);y.push_back(0.0);
     y.push_back(-sin(pitch));y.push_back(0.0);y.push_back(cos(pitch));
-    cv::Mat rotY(cv::Size(3,3),CV_32FC1,y.data());
+    cv::Mat rotY(cv::Size(3,3),CV_64FC1,y.data());
  
     std::vector<double> z;
     z.push_back(cos(yaw));z.push_back(-sin(yaw));z.push_back(0.0);
     z.push_back(sin(yaw));z.push_back(cos(yaw));z.push_back(0.0);
     z.push_back(0.0);z.push_back(0.0);z.push_back(1.0);
-    cv::Mat rotZ(cv::Size(3,3),CV_32FC1,z.data());
+    cv::Mat rotZ(cv::Size(3,3),CV_64FC1,z.data());
 
     cv::Mat R=rotZ*rotY*rotX;
 
