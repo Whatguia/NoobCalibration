@@ -55,6 +55,28 @@ cv::Point2d ProjectPoint(cv::Point3d origin_xyz,cv::Mat projection_matrix)
     return cv::Point2d(result_x,result_y);
 }
 
+//使用投影矩阵，将3D空间坐标系中的点转换到2D图像坐标系
+cv::Point2d ProjectPoint(cv::Point3d origin_xyz,cv::Mat extrinsic,cv::Mat intrinsic)
+{
+    cv::Mat origin_point=cv::Mat::zeros(4,1,CV_64FC1);
+    origin_point.at<double>(0,0)=origin_xyz.x;
+    origin_point.at<double>(1,0)=origin_xyz.y;
+    origin_point.at<double>(2,0)=origin_xyz.z;
+    origin_point.at<double>(3,0)=1;
+    
+    cv::Mat camera_point=(extrinsic*origin_point)(cv::Range(0,3),cv::Range(0,1));
+    if(camera_point.at<double>(2,0)<0)
+    {
+        return cv::Point2d(0.0,0.0);
+    }
+
+    cv::Mat result_point=intrinsic*camera_point;
+    double result_x,result_y;
+    result_x=result_point.at<double>(0,0)/result_point.at<double>(2,0);
+    result_y=result_point.at<double>(1,0)/result_point.at<double>(2,0);
+    return cv::Point2d(result_x,result_y);
+}
+
 //根据目标框的xyz、wlh、roll、pitch、yaw信息，获取目标框的角点
 cv::Mat getBox(cv::Mat xyz_wlh_yaw)
 {

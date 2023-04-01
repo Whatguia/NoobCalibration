@@ -16,3 +16,7 @@ target_link_libraries(get_pixel libjsoncpp.a)
 add_executable(PnP ./src/PnP.cpp)
 target_link_libraries(PnP ${OpenCV_LIBS})
 target_link_libraries(PnP libjsoncpp.a)
+
+add_executable(projection ./src/projection.cpp)
+target_link_libraries(projection ${OpenCV_LIBS})
+target_link_libraries(projection libjsoncpp.a)

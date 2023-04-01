@@ -49,6 +49,29 @@
             ]
         },
         {
+            "name":"projection(gdp)启动",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/projection",
+            "args": [
+                "./data/undistorted_image.jpg",
+                "./data/pointcloud.pcd",
+                "./data/calibration.json"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name":"test(gdp)启动",
             "type": "cppdbg",
             "request": "launch",
