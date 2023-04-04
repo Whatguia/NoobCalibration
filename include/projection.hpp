@@ -55,7 +55,7 @@ cv::Point2d ProjectPoint(cv::Point3d origin_xyz,cv::Mat projection_matrix)
     return cv::Point2d(result_x,result_y);
 }
 
-//使用投影矩阵，将3D空间坐标系中的点转换到2D图像坐标系
+//使用相机在目标坐标系下的外参与相机内参，将3D空间坐标系中的点转换到2D图像坐标系
 cv::Point2d ProjectPoint(cv::Point3d origin_xyz,cv::Mat extrinsic,cv::Mat intrinsic)
 {
     cv::Mat origin_point=cv::Mat::zeros(4,1,CV_64FC1);
@@ -67,7 +67,7 @@ cv::Point2d ProjectPoint(cv::Point3d origin_xyz,cv::Mat extrinsic,cv::Mat intrin
     cv::Mat camera_point=(extrinsic*origin_point)(cv::Range(0,3),cv::Range(0,1));
     if(camera_point.at<double>(2,0)<0)
     {
-        return cv::Point2d(0.0,0.0);
+        return cv::Point2d(-1.0,-1.0);
     }
 
     cv::Mat result_point=intrinsic*camera_point;
@@ -78,9 +78,9 @@ cv::Point2d ProjectPoint(cv::Point3d origin_xyz,cv::Mat extrinsic,cv::Mat intrin
 }
 
 //根据目标框的xyz、wlh、roll、pitch、yaw信息，获取目标框的角点
-cv::Mat getBox(cv::Mat xyz_wlh_yaw)
+cv::Mat getBox(cv::Mat xyz_wlh_rpy)
 {
-    double* point_data=xyz_wlh_yaw.ptr<double>(0);
+    double* point_data=xyz_wlh_rpy.ptr<double>(0);
 
     cv::Mat corners(3,8,CV_64FC1);
     
@@ -131,6 +131,50 @@ void drawBoxCorners(cv::Mat data,cv::Mat corners,cv::Mat projection_matrix,cv::S
         );
     }
 
+    //在图像中绘制目标框的边
+    int err=0;
+    for(int i=0;i<8;i++)
+    {
+        if(corners_xy[i].x>=data.cols||corners_xy[i].x<=0||corners_xy[i].y>=data.rows||corners_xy[i].y<=0)err++;
+    }
+    if(err>=7)return;
+    for(int i=0;i<4;i++)
+    {
+        cv::line(data,cv::Point(corners_xy[i].x,corners_xy[i].y),cv::Point(corners_xy[i+4].x,corners_xy[i+4].y),colors,1,8);
+        cv::line(data,cv::Point(corners_xy[2*i].x,corners_xy[2*i].y),cv::Point(corners_xy[2*i+1].x,corners_xy[2*i+1].y),colors,1,8);
+        if(i<2)
+        {
+            cv::line(data,cv::Point(corners_xy[i].x,corners_xy[i].y),cv::Point(corners_xy[3-i].x,corners_xy[3-i].y),colors,1,8);
+        }
+        else
+        {
+            cv::line(data,cv::Point(corners_xy[i+2].x,corners_xy[i+2].y),cv::Point(corners_xy[9-i].x,corners_xy[9-i].y),colors,1,8);
+        }
+    }
+
+    return;
+}
+
+//使用相机在目标坐标系下的外参与相机内参，将目标坐标系下的目标框角点按框的顺序连线绘制在图像中
+void drawBoxCorners(cv::Mat data,cv::Mat corners,cv::Mat extrinsic,cv::Mat intrinsic,cv::Scalar colors)
+{
+    //将目标框的顶点转换到图像坐标系
+    std::vector<cv::Point2d> corners_xy;
+    for(int col=0;col<corners.cols;col++)
+    {
+        corners_xy.push_back(
+            ProjectPoint(
+                cv::Point3d(
+                    corners.at<double>(0,col),
+                    corners.at<double>(1,col),
+                    corners.at<double>(2,col)
+                ),
+                extrinsic,
+                intrinsic
+            )
+        );
+    }
+    
     //在图像中绘制目标框的边
     int err=0;
     for(int i=0;i<8;i++)
