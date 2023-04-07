@@ -214,7 +214,6 @@ Average projection error:
 6. 使用编译好的`projection`工具根据标定结果将`激光雷达点云`投影`去畸变后的图像`中以验证标定结果：
 
 ```shell
-#注意，该工具处于开发状态，目前仅作测试使用，后续会继续优化该代码
 cd {NoobCalibration_path}
 ./bin/projection {去畸变后的图像路径} {点云路径} {标定参数文件路径}
 #或
@@ -225,12 +224,6 @@ cd {NoobCalibration_path}
 7. 标定完成
 
 #
-## 关于结果的验证
-
-可以使用[SensorsCalibration](https://github.com/PJLab-ADG/SensorsCalibration)中`lidar2camera/manual_calib`模块，或者使用适配我们参数格式的[manual_calib](https://github.com/TankGewehr/manual_calib)修改版本，根据标定结果将同一帧点云投影到图像上，观察它们是否对齐。
-
-需要注意的是`SensorsCalibration`中默认使用的是激光雷达到相机的外参，我们默认保存的外参标定结果时相机到激光雷达的外参，因此需要将其组合成外参矩阵，然后计算其逆矩阵作为外参输入，如果使用适配我们参数格式的`manual_calib`则不需要考虑这个问题。
-
 ## 关于点对的数量
 
 PnP计算最少需要的点对数量为4，这也是为什么要求至少选择`4对共面的点对`，在实际标定过程中建议选择20到40对`分布在图像中不同位置、在点云中不同距离`的点对，这样的话在计算PnP后可以删掉投影误差较大的点（如果投影误差较大，则可能是错误的点对）。
