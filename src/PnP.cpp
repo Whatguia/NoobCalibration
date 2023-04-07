@@ -62,9 +62,9 @@ int main(int argc,char** argv)
     loadIntrinsic(intrinsic_and_extrinsic_json_path,intrinsic,distortion,image_size);   //载入去畸变后的图像再次标定的内参矩阵、畸变参数、图像大小
 
     cv::Mat extrinsic=cv::Mat::eye(4,4,CV_64FC1);   //相机到目标的外参
-    cv::Mat rvec=cv::Mat::zeros(3,1,CV_64FC1);  //创建旋转矩阵
-    cv::Mat tvec=cv::Mat::zeros(3,1,CV_64FC1);  //创建平移矩阵
-    cv::Mat rotate_Matrix=cv::Mat::eye(3,3,CV_64FC1);
+    cv::Mat rvec=cv::Mat::zeros(3,1,CV_64FC1);  //创建旋转向量
+    cv::Mat tvec=cv::Mat::zeros(3,1,CV_64FC1);  //创建平移向量
+    cv::Mat rotate_Matrix=cv::Mat::eye(3,3,CV_64FC1);   //创建旋转矩阵
     if(useExtrinsicGuess)
     {
         //当useExtrinsicGuess启用时，读取外参文件中的外参信息，并作为外参的初值送入PnP进行计算

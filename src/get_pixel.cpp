@@ -70,7 +70,7 @@ int main(int argc,char** argv)
     {
         cv::setMouseCallback(image_path,on_mouse,0);   //调用回调函数
         cv::imshow(image_path,image);
-        if(cv::waitKey()==27)
+        if(cv::waitKey()==27)   //按下ESC退出
         {
             break;
         }
